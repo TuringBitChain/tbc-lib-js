@@ -13,6 +13,37 @@ const PrivateKey = require('tbc-lib-js/lib/privatekey');
 const Address = require('tbc-lib-js/lib/address');
 const Script = require('tbc-lib-js/lib/script');
 const Signature = require('tbc-lib-js/lib/crypto/signature');  // Import the Signature module
+const Mnemonic = require('tbc-lib-js/lib/mnemonic/mnemonic');
+const PublicKey = require('tbc-lib-js/lib/publickey');
+
+// generate mnemonic
+//const mnemonic = new Mnemonic();
+const mnemonic = Mnemonic.fromString("word word word word word word word word word word word word", Mnemonic.Words.ENGLISH);
+
+// get seed from mnemonic
+const seed = mnemonic.toSeed();
+
+// create private key from seed with compressed format
+// will sign the transaction with this private key
+const privateKey = new PrivateKey(seed.slice(0, 32), 'livenet'); // 设置 compressed 为 true
+
+// get public key from private key
+const publicKey = privateKey.toPublicKey();
+
+// get WIF private key
+const wif = privateKey.toWIF();
+
+// get address from private key
+const address = privateKey.toAddress();
+
+// print results
+console.log('private key:', privateKey.toString());
+console.log('public key:', publicKey.toString());
+console.log('WIF private key (compressed):', wif);
+console.log('mnemonic:', mnemonic.phrase);
+console.log('address:', address.toString());
+
+
 
 // Create a new transaction
 const transaction = new Transaction();
@@ -51,12 +82,9 @@ transaction.fee(fee);
 // Set the transaction version
 transaction.version = 10;
 
-// Sign the transaction with each private key
-const privateKey1 = new PrivateKey('L1u...');
-
 
 // Explicitly sign each input
-transaction.sign(privateKey1, Signature.SIGHASH_ALL | Signature.SIGHASH_FORKID);
+transaction.sign(privatekey, Signature.SIGHASH_ALL | Signature.SIGHASH_FORKID);
 //transaction.sign(privateKey2, Signature.SIGHASH_ALL | Signature.SIGHASH_FORKID);
 
 
