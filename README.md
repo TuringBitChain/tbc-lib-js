@@ -18,14 +18,19 @@ const PublicKey = require('tbc-lib-js/lib/publickey');
 
 // generate mnemonic
 //const mnemonic = new Mnemonic();
-const mnemonic = Mnemonic.fromString("word word word word word word word word word word word word", Mnemonic.Words.ENGLISH);
+const mnemonic = Mnemonic.fromString(
+    "word word word word word word word word word word word word",
+    Mnemonic.Words.ENGLISH
+);
 
-// get seed from mnemonic
-const seed = mnemonic.toSeed();
+// get HDPrivateKey from mnemonic
+const HDPrivateKey = mnemonic.toHDPrivateKey('','livenet');
 
 // create private key from seed with compressed format
 // will sign the transaction with this private key
-const privateKey = new PrivateKey(seed.slice(0, 32), 'livenet'); // 设置 compressed 为 true
+const DerivationPath = "m/44'/236'/0'/1/0";
+const derivedHDPrivateKey =HDPrivateKey.deriveChild(DerivationPath);
+const privateKey = derivedHDPrivateKey.privateKey;
 
 // get public key from private key
 const publicKey = privateKey.toPublicKey();
@@ -59,10 +64,10 @@ transaction.from(utxo1);
 
 //Add the second input
 // const utxo2 = {
-//     txId: '8c70d452a2daa807e98f110b712b2098548b2395828275cdd590678c6bfd9a9f',
+//     txId: '<txid>',
 //     outputIndex: 1,
-//     script: new Script('76a9148753ce4a64e77ccf2185214bdbbef44f5b597f0588ac'),
-//     satoshis: 3149999965
+//     script: new Script('<script>'),
+//     satoshis: 50000000
 // };
 // transaction.from(utxo2);
 
