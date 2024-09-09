@@ -3,6 +3,8 @@ tbc
 
 Javascript Turing BC library.
 
+To get started, just `npm install tbc-lib-js`.
+
 Please see ./doc for documents details.
 
 
