@@ -595,6 +595,8 @@ declare module 'tbc' {
         static OP_NOP9: number;
         static OP_NOP10: number;
 
+        static OP_PUSH_META: number;
+
         // template matching params
         static OP_PUBKEYHASH: number;
         static OP_PUBKEY: number;
