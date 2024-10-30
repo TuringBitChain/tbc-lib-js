@@ -10,7 +10,7 @@
 
 /// <reference types="node" />
 
-declare module 'tbc' {
+declare module 'tbc-lib-js' {
     /**
      * Opcode class, representing opcodes used in Bitcoin Script
      * @constructor
@@ -596,6 +596,7 @@ declare module 'tbc' {
         static OP_NOP10: number;
 
         static OP_PUSH_META: number;
+        static OP_PARTIAL_HASH: number;
 
         // template matching params
         static OP_PUBKEYHASH: number;
@@ -638,8 +639,8 @@ declare module 'tbc' {
             writeUInt32BE(n: number): this;
             writeUInt32LE(n: number): this;
             writeInt32LE(n: number): this;
-            writeUInt64BEBN(n: number): this;
-            writeUInt64LEBN(n: number): this;
+            writeUInt64BEBN(n: crypto.BN): this;
+            writeUInt64LEBN(n: crypto.BN): this;
             writeVarintNum(n: number): this;
             writeVarintBN(n: crypto.BN): this;
             writeReverse(buf: Buffer): this;
@@ -799,6 +800,7 @@ declare module 'tbc' {
             outputIndex: number;
             script: string;
             satoshis: number;
+            ftBalance?: number;
         }
         class UnspentOutput {
             static fromObject(o: IUnspentOutput): UnspentOutput;
@@ -1424,7 +1426,7 @@ declare module 'tbc' {
             hash: Buffer | Uint8Array,
             network?: Networks.Type
         ): Address;
-        isValid(
+        static isValid(
             data: Buffer | Uint8Array | string | object,
             network?: Networks.Type | string,
             type?: string
