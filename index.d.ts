@@ -10,7 +10,7 @@
 
 /// <reference types="node" />
 
-declare module 'tbc' {
+declare module 'tbc-lib-js' {
     /**
      * Opcode class, representing opcodes used in Bitcoin Script
      * @constructor
@@ -797,7 +797,7 @@ declare module 'tbc' {
             address?: string;
             txId: string;
             outputIndex: number;
-            script: string;
+            script: Script;
             satoshis: number;
         }
         class UnspentOutput {
@@ -1495,7 +1495,7 @@ declare module 'tbc' {
         static fromBuffer(buf: Buffer): HashCache
         static fromJSON(json: object): HashCache
         static fromHex(hex: string): HashCache
-        
+
         toBuffer(): HashCache
         toJSON(): HashCache
         toHex(): HashCache
