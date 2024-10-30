@@ -151,7 +151,7 @@ async function main() {
        /**
         * Step 4: Mint new tokens and broadcast the transaction.
         */
-        const mintTX = await newToken.MintFT(privateKeyB, addressB); // Step 4.1: Create mint transaction
+        const mintTX = await newToken.MintFT(privateKeyA, addressA); // Step 4.1: Create mint transaction
         await newToken.broadcastTXraw(mintTX); // Step 4.2: Broadcast mint transaction
 
 
@@ -160,7 +160,7 @@ async function main() {
         */
         const Token = new FT('ee8d97e5953a6843c3269a7ce3ae4c5264b7af8539fa07764a7f0cf260bf5eb5'); // Step 5.1: Initialize token with existing TXID
         await Token.initialize(); // Step 5.2: Initialize token parameters
-        const transferTX = await Token.transfer(privateKeyB, addressA, 0.02); // Step 5.3: Create transfer transaction
+        const transferTX = await Token.transfer(privateKeyA, addressB, 0.02); // Step 5.3: Create transfer transaction
         await Token.broadcastTXraw(transferTX); // Step 5.4: Broadcast transfer transaction
 
 
