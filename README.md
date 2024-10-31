@@ -59,7 +59,7 @@ const transaction = new Transaction();
 const utxo1 = {
     txId: '<txid>',
     outputIndex: 0,
-    script: new Script('<lockingScript>'),
+    script: '<lockingScript>',
     satoshis: 50000000
 };
 transaction.from(utxo1);
@@ -68,7 +68,7 @@ transaction.from(utxo1);
 // const utxo2 = {
 //     txId: '<txid>',
 //     outputIndex: 1,
-//     script: new Script('<script>'),
+//     script: '<lockingScript>',
 //     satoshis: 50000000
 // };
 // transaction.from(utxo2);
@@ -111,7 +111,8 @@ This document provides a step-by-step guide for issuing an FT (Fungible Token) o
 To get started, install the library using the following command:
 
 ```bash
-npm install tbc-lib-js
+npm i tbc-lib-js
+npm i --save-dev @types/node
 ```
 FT Issuance Program
 The following program demonstrates how to issue an FT using a UTXO (Unspent Transaction Output) on the Turing blockchain. It includes creating a new transaction, adding inputs and outputs, signing the transaction, and retrieving the serialized transaction hex.
@@ -126,6 +127,8 @@ import * as tbc from 'tbc-lib-js';
 const privateKeyA = tbc.PrivateKey.fromString('L1u2TmR7hMMMSV9Bx2Lyt3sujbboqEFqnKygnPRnQERhKB4qptuK');
 const publicKeyA = tbc.PublicKey.fromPrivateKey(privateKeyA);
 const addressA = tbc.Address.fromPrivateKey(privateKeyA).toString();
+
+const addressB = '1FhSD1YezTXbdRGWzNbNvUj6qeKQ6gZDMq'
 
 /**
  * Step 2: Define token parameters.
@@ -158,7 +161,7 @@ async function main() {
        /**
         * Step 5: Initialize an existing token and perform a transfer.
         */
-        const Token = new FT('ee8d97e5953a6843c3269a7ce3ae4c5264b7af8539fa07764a7f0cf260bf5eb5'); // Step 5.1: Initialize token with existing TXID
+        const Token = new FT('ee8d97e5953a6843c3269a7ce3ae4c5264b7af8539fa07764a7f0cf260bf5eb5'); // Step 5.1: Initialize token with contract TXID
         await Token.initialize(); // Step 5.2: Initialize token parameters
         const transferTX = await Token.transfer(privateKeyA, addressB, 0.02); // Step 5.3: Create transfer transaction
         await Token.broadcastTXraw(transferTX); // Step 5.4: Broadcast transfer transaction
@@ -171,3 +174,7 @@ async function main() {
 
 main();
 ```
+Explanation: UTXO refers to the output of P2PKH, which provides fees for transactions. Fttxo refers to the output of storing ft contract code.
+
+The FT SDK only provides basic UTXO retrieval, which means adding only one UTXO and FTTXO for transactions. To better build transactions, developers are advised to learn how to manage UTXO locally. If there is insufficient transaction fee or FT amount, please try checking the balance from the API. If the balance is sufficient, you can manually add multiple UTXO or FTTXO. 
+`Note that when manually adding, ensure that the utxo input is after the fttxo input.`
