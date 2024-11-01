@@ -26,7 +26,7 @@ const mnemonic = Mnemonic.fromString(
 );
 
 // get HDPrivateKey from mnemonic
-const HDPrivateKey = mnemonic.toHDPrivateKey('','livenet');
+const HDPrivateKey = mnemonic.toHDPrivateKey('','mainnet');
 
 // create private key from seed with compressed format
 // will sign the transaction with this private key
@@ -86,10 +86,6 @@ transaction.change(changeAddress);
 const fee = 1000;
 transaction.fee(fee);
 
-// Set the transaction version
-transaction.version = 10;
-
-
 // Explicitly sign each input
 transaction.sign(privatekey, Signature.SIGHASH_ALL | Signature.SIGHASH_FORKID);
 //transaction.sign(privateKey2, Signature.SIGHASH_ALL | Signature.SIGHASH_FORKID);
@@ -108,7 +104,7 @@ Create FT
 
 This document provides a step-by-step guide for issuing an FT (Fungible Token) on the Turing blockchain using the `tbc-lib-js` library. The guide is beginner-friendly and covers key concepts such as setting up a wallet, creating a transaction, and issuing an FT.
 
-To get started, install the library using the following command:
+To get started, install the library using the following command:`(Note:Download the @types/node package corresponding to your Node.js)`
 
 ```bash
 npm i tbc-lib-js
@@ -177,4 +173,4 @@ main();
 Explanation: UTXO refers to the output of P2PKH, which provides fees for transactions. Fttxo refers to the output of storing ft contract code.
 
 The FT SDK only provides basic UTXO retrieval, which means adding only one UTXO and FTTXO for transactions. To better build transactions, developers are advised to learn how to manage UTXO locally. If there is insufficient transaction fee or FT amount, please try checking the balance from the API. If the balance is sufficient, you can manually add multiple UTXO or FTTXO. 
-`Note that when manually adding, ensure that the utxo input is after the fttxo input.`
+`Note:When manually adding, ensure that the utxo input is after the fttxo input.`
