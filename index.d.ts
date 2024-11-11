@@ -1514,4 +1514,15 @@ declare module 'tbc-lib-js' {
         transfer(privateKey_from: PrivateKey, address_to: string, amount: number): Promise<string>;
         broadcastTXraw(txraw: string): Promise<string>;
     }
+
+    export class Multisig {
+        constructor();
+        static getHash(publicKeys: PublicKey[]): Buffer;
+        static createMultisigAddress(hash: Buffer, signatureCount: number, publicKeyCount: number): string;
+        static getMultisigLockScript(address: string): string;
+        static createP2pkhToMultisigTransaction(fromAddress: string, toAddress: string, satoshis: number, utxo: Transaction.IUnspentOutput, privateKey: PrivateKey): Transaction;
+        static fromMultisigTransaction(fromAddress: string, toAddress: string, satoshis: number, utxo: Transaction.IUnspentOutput): Transaction;
+        static signfromMultisigTransaction(transaction: Transaction, privateKey: PrivateKey, inputIndex: number): string | string[];
+        static createFromMultisigTransaction(transaction: Transaction, sigs: string[], pubkeys: string, inputIndex: number): Transaction;
+    }
 }

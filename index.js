@@ -67,6 +67,7 @@ tbc.HashCache = require('./lib/hash-cache')
 tbc.Mnemonic = require('./lib/mnemonic/mnemonic.js')
 tbc.Message = require('./lib/message/message.js')
 tbc.FT = require('./lib/contract/ft.js')
+tbc.Multisig = require('./lib/contract/multiSig.js')
 
 
 
