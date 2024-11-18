@@ -1533,7 +1533,7 @@ declare module 'tbc-lib-js' {
     }
 
     export class NFT {
-        constructor(baseUrl: string);
+        constructor(baseUrl?: string);
         createNFT(fromAddress: Address, toAddress: Address, privateKey: PrivateKey, data: NFTData): Promise<string>;
         transferNFT(fromAddress: Address, toAddress: Address, privateKey: PrivateKey, data: NFTData, txId: string): Promise<string>
     }
