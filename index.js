@@ -13,8 +13,8 @@ tbc.versionGuard = function (version) {
     console.warn(message)
   }
 }
-tbc.versionGuard(global._bsv)
-global._bsv = tbc.version
+tbc.versionGuard(globalThis._bsv)
+globalThis._bsv = tbc.version
 
 // crypto
 tbc.crypto = {}
@@ -41,6 +41,14 @@ tbc.util.preconditions = require('./lib/util/preconditions')
 // errors thrown by the library
 tbc.errors = require('./lib/errors')
 
+// dependencies, subject to change
+tbc.deps = {}
+tbc.deps.bnjs = require('bn.js')
+tbc.deps.bs58 = require('bs58')
+tbc.deps.Buffer = Buffer
+tbc.deps.elliptic = require('elliptic')
+tbc.deps._ = require('./lib/util/_')
+
 // main bitcoin library
 tbc.Address = require('./lib/address')
 tbc.Block = require('./lib/block')
@@ -56,14 +64,14 @@ tbc.Script = require('./lib/script')
 tbc.Transaction = require('./lib/transaction')
 tbc.ECIES = require('./lib/ecies')
 tbc.HashCache = require('./lib/hash-cache')
+tbc.Mnemonic = require('./lib/mnemonic/mnemonic.js')
+tbc.Message = require('./lib/message/message.js')
+tbc.FT = require('./lib/contract/ft.js')
+tbc.NFT = require('./lib/contract/nft.js')
+tbc.Multisig = require('./lib/contract/multiSig.js')
 
-// dependencies, subject to change
-tbc.deps = {}
-tbc.deps.bnjs = require('bn.js')
-tbc.deps.bs58 = require('bs58')
-tbc.deps.Buffer = Buffer
-tbc.deps.elliptic = require('elliptic')
-tbc.deps._ = require('./lib/util/_')
+
+
 
 // Internal usage, exposed for testing/advanced tweaking
 tbc.Transaction.sighash = require('./lib/transaction/sighash')
