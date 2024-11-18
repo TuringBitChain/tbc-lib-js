@@ -26,6 +26,7 @@ declare module 'tbc-lib-js' {
          * @output empty
          * @static
          */
+        static smallInt(number): Opcode;
         static OP_0: number;
         /** 
          * The next byte contains the number of bytes to be pushed onto the stack.
@@ -918,8 +919,11 @@ declare module 'tbc-lib-js' {
         constructor(raw?: string);
 
         from(
-            utxos: Transaction.IUnspentOutput | Transaction.IUnspentOutput[]
+            utxo: Transaction.IUnspentOutput | Transaction.IUnspentOutput[],
+            pubkeys?: PublicKey[],
+            threshold?: number
         ): this;
+
         fromString(rawTxHex: string): this;
         fromBuffer(buffer: Buffer): this;
         to(address: Address[] | Address | string, amount: number): this;
@@ -1311,7 +1315,7 @@ declare module 'tbc-lib-js' {
     }
 
     export class Script {
-        constructor(data: string | object);
+        constructor(data?: string | object);
 
         chunks: Array<Script.IOpChunk>;
         length: number;
@@ -1408,7 +1412,7 @@ declare module 'tbc-lib-js' {
 
         constructor(
             data: Buffer | Uint8Array | string | object,
-            network?: Networks.Type | string,
+            network?: Networks.Type | string | number,
             type?: string
         );
         static fromString(address: string, network?: Networks.Type): Address;
@@ -1497,9 +1501,40 @@ declare module 'tbc-lib-js' {
         static fromBuffer(buf: Buffer): HashCache
         static fromJSON(json: object): HashCache
         static fromHex(hex: string): HashCache
-        
+
         toBuffer(): HashCache
         toJSON(): HashCache
         toHex(): HashCache
+    }
+
+    export class FT {
+        constructor(txidOrParams: string | { name: string, symbol: string, amount: number, decimal: number });
+        initialize(): Promise<void>;
+        MintFT(privateKey_from: PrivateKey, address_to: string): Promise<string>;
+        transfer(privateKey_from: PrivateKey, address_to: string, amount: number): Promise<string>;
+        broadcastTXraw(txraw: string): Promise<string>;
+    }
+
+    export class Multisig {
+        static getHash(publicKeys: PublicKey[]): Buffer;
+        static createMultisigAddress(hash: Buffer, signatureCount: number, publicKeyCount: number): string;
+        static getMultisigLockScript(address: string): string;
+        static createP2pkhToMultisigTransaction(fromAddress: string, toAddress: string, satoshis: number, utxo: Transaction.IUnspentOutput, privateKey: PrivateKey): Transaction;
+        static fromMultisigTransaction(fromAddress: string, toAddress: string, satoshis: number, utxo: Transaction.IUnspentOutput): Transaction;
+        static signfromMultisigTransaction(transaction: Transaction, privateKey: PrivateKey, inputIndex: number): string | string[];
+        static createFromMultisigTransaction(transaction: Transaction, sigs: string[], pubkeys: string, inputIndex: number): Transaction;
+    }
+
+    interface NFTData {
+        nftName?: string;
+        symbol?: string,
+        description?: string,
+        file?: string
+    }
+
+    export class NFT {
+        constructor(baseUrl: string);
+        createNFT(fromAddress: Address, toAddress: Address, privateKey: PrivateKey, data: NFTData): Promise<string>;
+        transferNFT(fromAddress: Address, toAddress: Address, privateKey: PrivateKey, data: NFTData, txId: string): Promise<string>
     }
 }
