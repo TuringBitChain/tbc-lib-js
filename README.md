@@ -112,9 +112,9 @@ npm i --save-dev @types/node
 ```
 FT Issuance Program
 The following program demonstrates how to issue an FT using a UTXO (Unspent Transaction Output) on the Turing blockchain. It includes creating a new transaction, adding inputs and outputs, signing the transaction, and retrieving the serialized transaction hex.
-```
-import { FT } from 'tbc-lib-js/lib/contract/ft'
+```ts
 import * as tbc from 'tbc-lib-js';
+import { FT } from 'tbc-lib-js/lib/contract/ft'
 
 /**
  * Step 1: Set up the wallet private key and address.
@@ -131,8 +131,8 @@ const addressB = '1FhSD1YezTXbdRGWzNbNvUj6qeKQ6gZDMq'
  */
 const ftName = 'test_usdt';
 const ftSymbol = 'test_usdt';
-const ftDecimal = 10; 
-const ftAmount = 2.1;
+const ftDecimal = 6; 
+const ftAmount = 210000000;
 
 async function main() {
     try {
@@ -174,3 +174,62 @@ Explanation: UTXO refers to the output of P2PKH, which provides fees for transac
 
 The FT SDK only provides basic UTXO retrieval, which means adding only one UTXO and FTTXO for transactions. To better build transactions, developers are advised to learn how to manage UTXO locally. If there is insufficient transaction fee or FT amount, please try checking the balance from the API. If the balance is sufficient, you can manually add multiple UTXO or FTTXO. 
 `Note:When manually adding, ensure that the utxo input is after the fttxo input.`
+
+
+poolNFT
+===
+```ts
+import * as tbc from 'tbc-lib-js';
+import { poolNFT } from 'tbc-lib-js/lib/contract/poolNFT';
+
+//测试链私钥
+const privateKeyA = tbc.PrivateKey.fromString('L1u2TmR7hMMMSV9Bx2Lyt3sujbboqEFqnKygnPRnQERhKB4qptuK');
+const publicKeyA = tbc.PublicKey.fromPrivateKey(privateKeyA);
+const addressA = tbc.Address.fromPrivateKey(privateKeyA).toString();
+
+async function main() {
+    try {
+        //Step 1: 创建poolNFT，在initCreate()方法中传入FT合约ID
+        const pool = new poolNFT();
+        await pool.initCreate('80e056fe24e90ff4ef849eca33047243e27ebada13eea695db0d660726fec2ed');
+        const tx1 = await pool.createPoolNFT(privateKeyA);
+        await pool.broadcastTXraw(tx1);
+
+        //Step 2: 使用已创建的poolNFT，传入poolNFT合约ID进行初始化
+        const poolNftContractId = 'a17cfb4c11560c38d54e4ffaa24b94c7bee39bbc929f13e46db9bc69403846ce';
+        const poolUse = new poolNFT(poolNftContractId);
+        await poolUse.initfromContractId();
+
+        //Step 2.1: 为刚创建的poolNFT注入初始资金。传入参数:TBC数量、FT数量、要换取的LP数量，当前设定池中初始LP数量等于注入的TBC数量
+        let lp = 2;//换取的LP数量
+        let tbc = 30;
+        let fta = 1000;
+        let tx2 = await poolUse.initPoolNFT(privateKeyA, addressA, lp, tbc, fta);
+        await poolUse.broadcastTXraw(tx2);
+
+        //Step 2.2: 为已完成初始资金注入的poolNFT添加流动性。传入参数:向池中添加的TBC数量(会同步计算需要添加的Token数量)，要求添加至少1个TBC
+        let tbc = 1;
+        const tx3 = await poolUse.increaseLP(privateKeyA, addressA, tbc);
+        await poolUse.broadcastTXraw(tx3);
+
+        //Step 2.3: 花费拥有的LP。传入参数:要花费的LP数量，要求花费至少1个LP
+        let lp = 2;
+        const tx4 = await poolUse.consumLP(privateKeyA, addressA, lp);
+        await poolUse.broadcastTXraw(tx4);
+
+        //Step 2.4: 用TBC兑换Token。传入参数:要兑换的Token数量，要求至少花费1个TBC
+        let fta = 100;
+        const tx5 = await poolUse.swaptoToken(privateKeyA, addressA, fta);
+        await poolUse.broadcastTXraw(tx5);
+
+        //Step 2.5: Token兑换TBC。传入参数:要兑换的TBC数量，要求至少兑换1个TBC
+        let tbc = 1;
+        const tx6 = await poolUse.swaptoTBC(privateKeyA, addressA, tbc);
+        await poolUse.broadcastTXraw(tx6);
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+
+main();
+```
