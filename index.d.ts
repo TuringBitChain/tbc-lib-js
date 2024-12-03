@@ -801,7 +801,7 @@ declare module 'tbc-lib-js' {
             outputIndex: number;
             script: string;
             satoshis: number;
-            ftBalance?: number;
+            ftBalance?: bigint;
         }
         class UnspentOutput {
             static fromObject(o: IUnspentOutput): UnspentOutput;
