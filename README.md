@@ -114,7 +114,7 @@ FT Issuance Program
 The following program demonstrates how to issue an FT using a UTXO (Unspent Transaction Output) on the Turing blockchain. It includes creating a new transaction, adding inputs and outputs, signing the transaction, and retrieving the serialized transaction hex.
 ```ts
 import * as tbc from 'tbc-lib-js';
-import { FT } from 'tbc-lib-js/lib/contract/ft'
+import { FT } from 'tbc-lib-js'
 
 /**
  * Step 1: Set up the wallet private key and address.
@@ -180,7 +180,7 @@ poolNFT
 ===
 ```ts
 import * as tbc from 'tbc-lib-js';
-import { poolNFT } from 'tbc-lib-js/lib/contract/poolNFT';
+import { poolNFT } from 'tbc-lib-js';
 
 //测试链私钥
 const privateKeyA = tbc.PrivateKey.fromString('L1u2TmR7hMMMSV9Bx2Lyt3sujbboqEFqnKygnPRnQERhKB4qptuK');
@@ -201,14 +201,13 @@ async function main() {
         await poolUse.initfromContractId();
 
         //Step 2.1: 为刚创建的poolNFT注入初始资金。传入参数:TBC数量、FT数量、要换取的LP数量，当前设定池中初始LP数量等于注入的TBC数量
-        let lp = 2;//换取的LP数量
         let tbc = 30;
         let fta = 1000;
         let tx2 = await poolUse.initPoolNFT(privateKeyA, addressA, lp, tbc, fta);
         await poolUse.broadcastTXraw(tx2);
 
-        //Step 2.2: 为已完成初始资金注入的poolNFT添加流动性。传入参数:向池中添加的TBC数量(会同步计算需要添加的Token数量)，要求添加至少1个TBC
-        let tbc = 1;
+        //Step 2.2: 为已完成初始资金注入的poolNFT添加流动性。传入参数:向池中添加的TBC数量(会同步计算需要添加的Token数量)，要求添加至少0.1个TBC
+        let tbc = 0.1;
         const tx3 = await poolUse.increaseLP(privateKeyA, addressA, tbc);
         await poolUse.broadcastTXraw(tx3);
 
@@ -217,13 +216,13 @@ async function main() {
         const tx4 = await poolUse.consumLP(privateKeyA, addressA, lp);
         await poolUse.broadcastTXraw(tx4);
 
-        //Step 2.4: 用TBC兑换Token。传入参数:要兑换的Token数量，要求至少花费1个TBC
+        //Step 2.4: 用TBC兑换Token。传入参数:要兑换的Token数量，要求至少花费0.1个TBC
         let fta = 100;
         const tx5 = await poolUse.swaptoToken(privateKeyA, addressA, fta);
         await poolUse.broadcastTXraw(tx5);
 
-        //Step 2.5: Token兑换TBC。传入参数:要兑换的TBC数量，要求至少兑换1个TBC
-        let tbc = 1;
+        //Step 2.5: Token兑换TBC。传入参数:要兑换的TBC数量，要求至少兑换0.1个TBC
+        let tbc = 0.1;
         const tx6 = await poolUse.swaptoTBC(privateKeyA, addressA, tbc);
         await poolUse.broadcastTXraw(tx6);
     } catch (error) {
