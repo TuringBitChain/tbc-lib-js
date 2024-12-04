@@ -3,3 +3,7 @@ benchmark.js
 .mocharc.yaml
 .travis.yml
 docs/
+tbc-ecies.min.js
+tbc-message.min.js
+tbc-mnemonic.min.js
+tbc.min.js
