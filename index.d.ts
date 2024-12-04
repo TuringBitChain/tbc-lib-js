@@ -1607,10 +1607,10 @@ declare module 'tbc-lib-js' {
 
     export class poolNFT {
         constructor(txidOrParams?: string | { ftContractTxid: string, tbc_amount: number, ft_a: number });
-        async initCreate(ftContractTxid?: string): Promise<void>;
-        async initfromContractId(): Promise<void>;
-        async createPoolNFT(privateKey_from: PrivateKey): Promise<string>;
-        async initPoolNFT(privateKey_from: PrivateKey, address_to: string, tbc_amount?: number, ft_a?: number): Promise<string>;
+        initCreate(ftContractTxid?: string): Promise<void>;
+        initfromContractId(): Promise<void>;
+        createPoolNFT(privateKey_from: PrivateKey): Promise<string>;
+        initPoolNFT(privateKey_from: PrivateKey, address_to: string, tbc_amount?: number, ft_a?: number): Promise<string>;
         initCreate(ftContractTxid?: string): Promise<void>;
         initfromContractId(): Promise<void>;
         createPoolNFT(privateKey_from: PrivateKey): Promise<string>;
