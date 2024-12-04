@@ -1,0 +1,5 @@
+test/
+benchmark.js
+.mocharc.yaml
+.travis.yml
+docs/
