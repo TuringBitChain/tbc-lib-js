@@ -1507,22 +1507,68 @@ declare module 'tbc-lib-js' {
         toHex(): HashCache
     }
 
+    interface TapeAmount {
+        amountHex: string;
+        changeHex: string
+    }
+
     export class FT {
+        name: string;
+        symbol: string;
+        decimal: number;
+        totalSupply: number;
+        codeScript: string;
+        tapeScript: string;
+        contractTxid: string;
+
         constructor(txidOrParams: string | { name: string, symbol: string, amount: number, decimal: number });
         initialize(): Promise<void>;
+        buildFTtransferCode(code: string, addressOrHash: string): Script;
+        buildFTtransferTape(tape: string, amountHex: string): Script;
+        buildTapeAmount(amountBN: bigint, tapeAmountSet: bigint[], ftInputIndex?: number): TapeAmount;
+        getFTunlock(privateKey_from: PrivateKey, currentTX: Transaction, currentUnlockIndex: number, preTxId: string, preVout: number): Promise<Script>;
+        getFTunlockSwap(privateKey_from: PrivateKey, currentTX: Transaction, currentUnlockIndex: number, preTxId: string, preVout: number): Promise<Script>;
+        getFTmintCode(txid: string, vout: number, address: any, tapeSize: number): Script;
         MintFT(privateKey_from: PrivateKey, address_to: string): Promise<string>;
         transfer(privateKey_from: PrivateKey, address_to: string, amount: number): Promise<string>;
         broadcastTXraw(txraw: string): Promise<string>;
     }
 
+    interface MultiTxRaw {
+        txraw: string;
+        amounts: number[];
+    }
+
+    interface Unspent {
+        tx_hash: string;
+        tx_pos: number;
+        height: number;
+        value: number;
+    }
+
     export class Multisig {
-        static getHash(publicKeys: PublicKey[]): Buffer;
-        static createMultisigAddress(hash: Buffer, signatureCount: number, publicKeyCount: number): string;
-        static getMultisigLockScript(address: string): string;
-        static createP2pkhToMultisigTransaction(fromAddress: string, toAddress: string, satoshis: number, utxo: Transaction.IUnspentOutput, privateKey: PrivateKey): Transaction;
-        static fromMultisigTransaction(fromAddress: string, toAddress: string, satoshis: number, utxo: Transaction.IUnspentOutput): Transaction;
-        static signfromMultisigTransaction(transaction: Transaction, privateKey: PrivateKey, inputIndex: number): string | string[];
-        static createFromMultisigTransaction(transaction: Transaction, sigs: string[], pubkeys: string, inputIndex: number): Transaction;
+        ft: FT | undefined;
+        network: "mainnet" | "testnet";
+
+        constructor(config?: { ft?: FT, network?: "testnet" | "mainnet" });
+        getCombineHash(address: string): string;
+        createMultisigAddress(pubkeys: string[], signatureCount: number, publicKeyCount: number): string;
+        getSignatureAndPublicKeyCount(address: string): { signatureCount: number, publicKeyCount: number };
+        getMultisigLockScript(address: string): string;
+        verifyMultisigAddress(pubkeys: string[], address: string): boolean;
+        createMultisigWalletTransaction(address_from: string, pubkeys: string[], signatureCount: number, publicKeyCount: number, satoshis: number, privateKey: PrivateKey): Promise<string>;
+        createP2pkhToMultisigTransaction(fromAddress: string, toAddress: string, satoshis: number, privateKey: PrivateKey): Promise<string>;
+        fromMultisigTransaction(fromAddress: string, toAddress: string, satoshis: number): Promise<MultiTxRaw>;
+        signfromMultisigTransaction(fromAddress: string, multiTxraw: MultiTxRaw, privateKey: PrivateKey): string[];
+        createFromMultisigTransaction(txraw: string, sigs: string[][], pubkeys: string): Promise<string>;
+        p2pkhToMultiMintFT(privateKey_from: PrivateKey, address_to: string): Promise<string>;
+        fromMultisigMintFt(address_from: string, address_to: string): Promise<MultiTxRaw>;
+        signfromMultisigMintFTTransaction(address_from: string, multiTxraw: MultiTxRaw, privateKey: PrivateKey): string[];
+        createFromMultisigMintFTTransaction(txraw: string, sigs: string[][], pubkeys: string): Promise<string>;
+        p2pkhToMultiFtTransfer(privateKey_from: PrivateKey, address_to: string, amount: number): Promise<string>;
+        fromMultisigTransferFt(privateKey_from: PrivateKey, address_from: string, address_to: string, amount: number): Promise<MultiTxRaw>;
+        signfromMultisigTransferFTTransaction(fromAddress: string, multiTxraw: MultiTxRaw, privateKey: PrivateKey): string[];
+        createFromMultisigTransferFTTransaction(txraw: string, sigs: string[][], pubkeys: string): Promise<string>;
     }
 
     interface NFTData {
@@ -1533,8 +1579,54 @@ declare module 'tbc-lib-js' {
     }
 
     export class NFT {
-        constructor(baseUrl?: string);
-        createNFT(fromAddress: Address, toAddress: Address, privateKey: PrivateKey, data: NFTData): Promise<string>;
-        transferNFT(fromAddress: Address, toAddress: Address, privateKey: PrivateKey, data: NFTData, txId: string): Promise<string>
+        constructor(network?: "mainnet" | "testnet");
+        createNFT(fromAddress: Address, toAddress: Address, privateKey: PrivateKey, data: NFTData, flag?: string): Promise<string>;
+        transferNFT(fromAddress: Address, toAddress: Address, privateKey: PrivateKey, data: NFTData, txId: string, flag: string): Promise<string>
+    }
+
+    export namespace poolNFT {
+        interface PoolNFTInfo {
+            ft_lp_amount: bigint;
+            ft_a_amount: bigint;
+            tbc_amount: bigint;
+            ft_lp_partialhash: string;
+            ft_a_partialhash: string;
+            ft_a_contractTxid: string;
+            poolnft_code: string;
+            currentContractTxid: string;
+            currentContractVout: number;
+            currentContractSatoshi: number;
+        }
+
+        interface poolNFTDifference {
+            ft_lp_difference: bigint;
+            ft_a_difference: bigint;
+            tbc_amount_difference: bigint;
+        }
+    }
+
+    export class poolNFT {
+        constructor(txidOrParams?: string | { ftContractTxid: string, tbc_amount: number, ft_a: number });
+        async initCreate(ftContractTxid?: string): Promise<void>;
+        async initfromContractId(): Promise<void>;
+        async createPoolNFT(privateKey_from: PrivateKey): Promise<string>;
+        async initPoolNFT(privateKey_from: PrivateKey, address_to: string, tbc_amount?: number, ft_a?: number): Promise<string>;
+        initCreate(ftContractTxid?: string): Promise<void>;
+        initfromContractId(): Promise<void>;
+        createPoolNFT(privateKey_from: PrivateKey): Promise<string>;
+        initPoolNFT(privateKey_from: PrivateKey, address_to: string, tbc_amount?: number, ft_a?: number): Promise<string>;
+        increaseLP(privateKey_from: PrivateKey, address_to: string, amount_tbc: number): Promise<string>;
+        consumLP(privateKey_from: PrivateKey, address_to: string, amount_lp: number): Promise<string>;
+        swaptoToken(privateKey_from: PrivateKey, address_to: string, amount_token: number): Promise<string>;
+        swaptoTBC(privateKey_from: PrivateKey, address_to: string, amount_tbc: number): Promise<string>;
+        fetchPoolNFTInfo(contractTxid: string): Promise<poolNFT.PoolNFTInfo>;
+        fetchPoolNftUTXO(contractTxid: string): Promise<Transaction.IUnspentOutput>;
+        fetchFtlpUTXO(ftlpCode: string, amount: bigint): Promise<Transaction.IUnspentOutput>;
+        mergeFTLP(privateKey_from: PrivateKey): Promise<boolean>;
+        mergeFTinPool(privateKey_from: PrivateKey): Promise<boolean>;
+        getPoolNFTunlock(privateKey_from: PrivateKey, currentTX: Transaction, currentUnlockIndex: number, preTxId: string, preVout: number, option: 1 | 2 | 3 | 4, swapOption?: 1 | 2): Promise<Script>;
+        getPoolNftCode(txid: string, vout: number): Script;
+        getFTLPcode(poolNftCodeHash: string, address: string, tapeSize: number): Script;
     }
 }
+
