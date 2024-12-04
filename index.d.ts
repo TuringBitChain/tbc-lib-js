@@ -1581,7 +1581,7 @@ declare module 'tbc-lib-js' {
     export class NFT {
         constructor(network?: "mainnet" | "testnet");
         createNFT(fromAddress: Address, toAddress: Address, privateKey: PrivateKey, data: NFTData, flag?: string): Promise<string>;
-        transferNFT(fromAddress: Address, toAddress: Address, privateKey: PrivateKey, data: NFTData, txId: string, flag: string): Promise<string>
+        transferNFT(fromAddress: Address, toAddress: Address, privateKey: PrivateKey, data: NFTData, txId: string, flag?: string): Promise<string>
     }
 
     export namespace poolNFT {
