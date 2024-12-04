@@ -69,8 +69,7 @@ tbc.Message = require('./lib/message/message.js')
 tbc.FT = require('./lib/contract/ft.js')
 tbc.NFT = require('./lib/contract/nft.js')
 tbc.Multisig = require('./lib/contract/multiSig.js')
-
-
+tbc.poolNFT = require('./lib/contract/poolNFT.js')
 
 
 // Internal usage, exposed for testing/advanced tweaking
