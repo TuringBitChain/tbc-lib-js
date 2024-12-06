@@ -1551,11 +1551,11 @@ declare module 'tbc-lib-js' {
         network: "mainnet" | "testnet";
 
         constructor(config?: { ft?: FT, network?: "testnet" | "mainnet" });
-        getCombineHash(address: string): string;
-        createMultisigAddress(pubkeys: string[], signatureCount: number, publicKeyCount: number): string;
-        getSignatureAndPublicKeyCount(address: string): { signatureCount: number, publicKeyCount: number };
-        getMultisigLockScript(address: string): string;
-        verifyMultisigAddress(pubkeys: string[], address: string): boolean;
+        static getCombineHash(address: string): string;
+        static createMultisigAddress(pubkeys: string[], signatureCount: number, publicKeyCount: number): string;
+        static getSignatureAndPublicKeyCount(address: string): { signatureCount: number, publicKeyCount: number };
+        static getMultisigLockScript(address: string): string;
+        static verifyMultisigAddress(pubkeys: string[], address: string): boolean;
         createMultisigWalletTransaction(address_from: string, pubkeys: string[], signatureCount: number, publicKeyCount: number, satoshis: number, privateKey: PrivateKey): Promise<string>;
         createP2pkhToMultisigTransaction(fromAddress: string, toAddress: string, satoshis: number, privateKey: PrivateKey): Promise<string>;
         fromMultisigTransaction(fromAddress: string, toAddress: string, satoshis: number): Promise<MultiTxRaw>;
