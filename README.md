@@ -231,4 +231,94 @@ async function main() {
 }
 
 main();
+
+
+//构造Multisig实例对象
+
+```
+//当从多签地址转移ft时，将ft对象作为属性传入 network默认主网
+const object = new Multisig({
+	ft?:FT
+	network?:"testnet"|"mainnet"
+})
+```
+
+//创建多签钱包
+
+```
+//address_from为普通p2pkh地址
+//signatureCount为1-6
+//publicKeyCount为3-10
+//amount单位为satoshis
+const multisig = new Multisig({ network: "testnet" })
+await multisig.createMultisigWalletTransaction(address_from, pubkeys, signatureCount, signatureCount, amount, privateKey);
+```
+
+//多签地址的计算
+
+```
+Multisig.createMultisigAddress(pubkeys,signatureCount,signatureCount)
+```
+
+//p2pkh地址转移tbc到多签地址
+
+```
+const multisig = new Multisig({ network: "testnet" })
+//address_from为普通p2pkh地址
+//address_to为多签地址
+await multisig.createP2pkhToMultisigTransaction(address_from, address_to, amount, privateKey);
+```
+
+//多签地址转移tbc到p2pkh地址或多签地址
+
+```
+//multiTxraw类型
+interface MultiTxRaw {
+    txraw: string;
+    amounts: number[];
+}
+//address_from为多签地址
+//address_to为普通p2pkh地址或多签地址
+const multisig = new Multisig({ network: "testnet" })
+const multiTxraw = await multisig.fromMultisigTransaction(address_from, address_to, amount);
+const sig = multisig.signfromMultisigTransaction(address_multi, multiTxraw, privateKey);
+for (let i = 0; i < sig1.length; i++) {
+        sigs[i] = [sig1[i], sig2[i], sig3[i],...];
+}
+await multisig.createFromMultisigTransaction(txraw, sigs, pubkeys);
+```
+
+//p2pkh地址转移ft到多签地址
+
+```
+const Token = new FT(contract_id); //ft文件里改成测试网
+await Token.initialize();
+const multisig = new Multisig({ ft：Token，network: "testnet" })
+//address_to为多签地址
+await multisig.p2pkhToMultiFtTransfer(privateKey, address_to, 0.1)
+```
+
+//多签地址转移ft到p2pkh地址或多签地址
+
+```
+const Token = new FT(contract_id); //ft文件里改成测试网
+await Token.initialize();
+const multisig = new Multisig({ ft：Token，network: "testnet" })
+//address_to为多签地址
+//multiTxraw类型
+interface MultiTxRaw {
+    txraw: string;
+    amounts: number[];
+}
+const multiTxraw = await multisig.fromMultisigTransferFt(privateKey, address_from, address_to, 0.01);
+const sig = multisig.signfromMultisigTransferFTTransaction(address_multi, multiTxraw, privateKey);
+for (let i = 0; i < sig1.length; i++) {
+        sigs[i] = [sig1[i], sig2[i], sig3[i],...];
+}
+await multisig.createFromMultisigTransferFTTransaction(txraw, sigs, pubkeys);
+
+
+```
+
+
 ```
