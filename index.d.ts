@@ -1594,7 +1594,7 @@ declare module 'tbc-lib-js' {
         nftP2pkhBalance: number;
         nftName: string;
         nftSymbol: string;
-        nft_attributes: string;
+        nftAttributes: string;
         nftDescription: string;
         nftTransferTimeCount: number;
         nftIcon: string
