@@ -1571,17 +1571,42 @@ declare module 'tbc-lib-js' {
         createFromMultisigTransferFTTransaction(txraw: string, sigs: string[][], pubkeys: string): Promise<string>;
     }
 
+    interface CollectionData {
+        collectionName: string;
+        description: string;
+        supply: number;
+        file: string;
+    };
+
     interface NFTData {
-        nftName?: string;
-        symbol?: string,
-        description?: string,
-        file?: string
+        nftName: string;
+        symbol: string;
+        discription: string;
+        attributes: string;
+        file?: string;
+    }
+
+    interface NFTInfo {
+        collectionId: string;
+        collectionIndex: number;
+        collectionName: string;
+        nftCodeBalance: number;
+        nftP2pkhBalance: number;
+        nftName: string;
+        nftSymbol: string;
+        nft_attributes: string;
+        nftDescription: string;
+        nftTransferTimeCount: number;
+        nftIcon: string
     }
 
     export class NFT {
-        constructor(network?: "mainnet" | "testnet");
-        createNFT(fromAddress: Address, toAddress: Address, privateKey: PrivateKey, data: NFTData, flag?: string): Promise<string>;
-        transferNFT(fromAddress: Address, toAddress: Address, privateKey: PrivateKey, data: NFTData, txId: string, flag?: string): Promise<string>
+        constructor(contract_id: string);
+        initialize(network?: "testnet" | "mainnet"): Promise<void>;
+        static createCollection(address: string, privateKey: PrivateKey, data: CollectionData, utxos: Transaction.IUnspentOutput[], network?: "testnet" | "mainnet"): Promise<string>;
+        static createNFT(collection_id: string, address: string, privateKey: PrivateKey, data: NFTData, utxos: Transaction.IUnspentOutput[], network?: "testnet" | "mainnet"): Promise<string>;
+        transferNFT(address_from: string, address_to: string, privateKey: PrivateKey, utxos: Transaction.IUnspentOutput[], network?: "testnet" | "mainnet"): Promise<string>;
+        static encodeByBase64(filePath: string): Promise<string>;
     }
 
     export namespace poolNFT {
