@@ -160,6 +160,7 @@ async function main() {
         const Token = new FT('ee8d97e5953a6843c3269a7ce3ae4c5264b7af8539fa07764a7f0cf260bf5eb5'); // Step 5.1: Initialize token with contract TXID
         await Token.initialize(); // Step 5.2: Initialize token parameters
         const transferTX = await Token.transfer(privateKeyA, addressB, 0.02); // Step 5.3: Create transfer transaction
+        await Token.mergeFT(privateKeyA); // Step 5.3.1: If ft balance of address is enough but each fttxos balance is not enough, should execute mergeFT before transfer
         await Token.broadcastTXraw(transferTX); // Step 5.4: Broadcast transfer transaction
 
 
@@ -172,7 +173,7 @@ main();
 ```
 Explanation: UTXO refers to the output of P2PKH, which provides fees for transactions. Fttxo refers to the output of storing ft contract code.
 
-The FT SDK only provides basic UTXO retrieval, which means adding only one UTXO and FTTXO for transactions. To better build transactions, developers are advised to learn how to manage UTXO locally. If there is insufficient transaction fee or FT amount, please try checking the balance from the API. If the balance is sufficient, you can manually add multiple UTXO or FTTXO. 
+The FT SDK only provides basic UTXO retrieval, which means adding only one UTXO and FTTXO for transactions. To better build transactions, developers are advised to learn how to manage UTXO locally. If there is insufficient transaction fee or FT amount, please try checking the balance from the API. If the balance is sufficient, you can merge UTXO or FTTXO. 
 `Note:When manually adding, ensure that the utxo input is after the fttxo input.`
 
 
@@ -231,8 +232,10 @@ async function main() {
 }
 
 main();
+```
 
-
+Multisig
+===
 //构造Multisig实例对象
 
 ```
@@ -316,9 +319,4 @@ for (let i = 0; i < sig1.length; i++) {
         sigs[i] = [sig1[i], sig2[i], sig3[i],...];
 }
 await multisig.createFromMultisigTransferFTTransaction(txraw, sigs, pubkeys);
-
-
-```
-
-
 ```
