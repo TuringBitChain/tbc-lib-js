@@ -319,4 +319,35 @@ for (let i = 0; i < sig1.length; i++) {
         sigs[i] = [sig1[i], sig2[i], sig3[i],...];
 }
 await multisig.createFromMultisigTransferFTTransaction(txraw, sigs, pubkeys);
+
+//NFT
+import * as tbc from "tbc-lib-js"
+const privateKey = tbc.PrivateKey.fromString("");
+const address = privateKey.toAddress().toString();
+const network = "testnet"  //network参数若不存在，默认为主网
+//const network = "mainnet" 
+const main = async ()=>{
+	const utxos = await tbc.NFT.selectUTXOs(address,amount_tbc,network);
+	const content = await tbc.NFT.encodeByBase64(filePath);
+	const collection_data = {
+    	collectionName: "";
+    	description: "";
+    	supply: 10;
+    	file: content;
+	};
+	const nft_data = {
+    	  nftName: "";
+   		  symbol: "";
+          discription: "";
+          attributes: "";
+          file?: content; //file可为空，为空引用合集的照片
+	}
+	const collection_id = await tbc.NFT.createCollection(address, privateKey, collection_data, utxos,network);//创建合集
+	const contract_id = await tbc.NFT.createNFT(collection_id,address,privateKey,nft_data, utxos,network);//创建合集下的NFT
+    const nft = new tbc.NFT(contract_id);
+    await nft.initialize();
+     await nft.transferNFT(address_from, address_to, privateKey, utxos,network);//转移nft
+}
+	
+main();
 ```
