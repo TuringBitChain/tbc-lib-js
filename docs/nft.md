@@ -1,3 +1,4 @@
+```ts
 import * as tbc from "tbc-lib-js"
 const fs = require('fs').promises;
 const path = require('path');
@@ -25,7 +26,7 @@ interface NFTInfo {
     nftP2pkhBalance: number;
     nftName: string;
     nftSymbol: string;
-    nft_attributes: string;
+    nftAttributes: string;
     nftDescription: string;
     nftTransferTimeCount: number;
     nftIcon: string
@@ -60,7 +61,7 @@ class NFT {
             nftP2pkhBalance,
             nftName,
             nftSymbol,
-            nft_attributes,
+            nftAttributes,
             nftDescription,
             nftTransferTimeCount,
             nftIcon } = await NFT.fetchNFTInfo(this.contract_id, network);
@@ -75,7 +76,7 @@ class NFT {
             nftName,
             symbol: nftSymbol,
             discription: nftDescription,
-            attributes: nft_attributes,
+            attributes: nftAttributes,
             file
         }
         this.collection_id = collectionId;
@@ -568,7 +569,7 @@ class NFT {
                 nftP2pkhBalance: data.nftInfoList[0].nftP2pkhBalance,
                 nftName: data.nftInfoList[0].nftName,
                 nftSymbol: data.nftInfoList[0].nftSymbol,
-                nft_attributes: data.nftInfoList[0].nft_attributes,
+                nftAttributes: data.nftInfoList[0].nftAttributes,
                 nftDescription: data.nftInfoList[0].nftDescription,
                 nftTransferTimeCount: data.nftInfoList[0].nftTransferTimeCount,
                 nftIcon: data.nftInfoList[0].nftIcon
@@ -582,6 +583,4 @@ class NFT {
 }
 
 module.exports = NFT;
-
-
-
+```
