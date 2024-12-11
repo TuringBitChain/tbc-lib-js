@@ -1,7 +1,19 @@
-```ts
 import * as tbc from "tbc-lib-js"
 const fs = require('fs').promises;
 const path = require('path');
+interface NFTInfo {
+    collectionId: string;
+    collectionIndex: number;
+    collectionName: string;
+    nftCodeBalance: number;
+    nftP2pkhBalance: number;
+    nftName: string;
+    nftSymbol: string;
+    nft_attributes: string;
+    nftDescription: string;
+    nftTransferTimeCount: number;
+    nftIcon: string;
+}
 
 interface CollectionData {
     collectionName: string;
@@ -16,20 +28,6 @@ interface NFTData {
     discription: string;
     attributes: string;
     file?: string;
-}
-
-interface NFTInfo {
-    collectionId: string;
-    collectionIndex: number;
-    collectionName: string;
-    nftCodeBalance: number;
-    nftP2pkhBalance: number;
-    nftName: string;
-    nftSymbol: string;
-    nftAttributes: string;
-    nftDescription: string;
-    nftTransferTimeCount: number;
-    nftIcon: string
 }
 
 class NFT {
@@ -52,7 +50,7 @@ class NFT {
         this.contract_id = contract_id;
     }
 
-    async initialize(network?: "testnet" | "mainnet") {
+    initialize(nftInfo: NFTInfo) {
         const {
             collectionId,
             collectionIndex,
@@ -61,10 +59,10 @@ class NFT {
             nftP2pkhBalance,
             nftName,
             nftSymbol,
-            nftAttributes,
+            nft_attributes,
             nftDescription,
             nftTransferTimeCount,
-            nftIcon } = await NFT.fetchNFTInfo(this.contract_id, network);
+            nftIcon } = nftInfo;
         let file: string = "";
         const writer = new tbc.encoding.BufferWriter();
         if (nftIcon === collectionId + writer.writeUInt32LE(collectionIndex).toBuffer().toString("hex")) {
@@ -76,7 +74,7 @@ class NFT {
             nftName,
             symbol: nftSymbol,
             discription: nftDescription,
-            attributes: nftAttributes,
+            attributes: nft_attributes,
             file
         }
         this.collection_id = collectionId;
@@ -87,7 +85,7 @@ class NFT {
         this.transfer_count = nftTransferTimeCount;
     }
 
-    static async createCollection(address: string, privateKey: tbc.PrivateKey, data: CollectionData, utxos: tbc.Transaction.IUnspentOutput[], network?: "testnet" | "mainnet"): Promise<string> {
+    static createCollection(address: string, privateKey: tbc.PrivateKey, data: CollectionData, utxos: tbc.Transaction.IUnspentOutput[]): string {
         const tx = new tbc.Transaction();
         for (let i = 0; i < utxos.length; i++) {
             tx.from(utxos[i]);
@@ -99,7 +97,7 @@ class NFT {
 
         for (let i = 0; i < data.supply; i++) {
             tx.addOutput(new tbc.Transaction.Output({
-                script: NFT.buildHoldScript(address),
+                script: NFT.buildMintScript(address),
                 satoshis: 100,
             }));
         }
@@ -108,13 +106,11 @@ class NFT {
             .change(address)
             .sign(privateKey);
 
-        return await NFT.broadcastTXraw(tx.uncheckedSerialize(), network);
-
+        return tx.uncheckedSerialize();
     }
 
-    static async createNFT(collection_id: string, address: string, privateKey: tbc.PrivateKey, data: NFTData, utxos: tbc.Transaction.IUnspentOutput[], network?: "testnet" | "mainnet"): Promise<string> {
+    static createNFT(collection_id: string, address: string, privateKey: tbc.PrivateKey, data: NFTData, utxos: tbc.Transaction.IUnspentOutput[], nfttxo: tbc.Transaction.IUnspentOutput): string {
         const hold = NFT.buildHoldScript(address);
-        const nfttxo = await NFT.fetchNFTTXO({ script: hold.toBuffer().toString("hex"), tx_hash: collection_id, network });
         if (!data.file) {
             const writer = new tbc.encoding.BufferWriter();
             data.file = collection_id + writer.writeUInt32LE(nfttxo.outputIndex).toBuffer().toString("hex");
@@ -151,14 +147,11 @@ class NFT {
             })
             .sign(privateKey)
             .seal()
-        return await NFT.broadcastTXraw(tx.uncheckedSerialize(), network);
+        return tx.uncheckedSerialize();;
     }
 
-    async transferNFT(address_from: string, address_to: string, privateKey: tbc.PrivateKey, utxos: tbc.Transaction.IUnspentOutput[], network?: "testnet" | "mainnet"): Promise<string> {
+    transferNFT(address_from: string, address_to: string, privateKey: tbc.PrivateKey, utxos: tbc.Transaction.IUnspentOutput[], pre_tx: tbc.Transaction, pre_pre_tx: tbc.Transaction): string {
         const code = NFT.buildCodeScript(this.collection_id, this.collection_index);
-        const nfttxo = await NFT.fetchNFTTXO({ script: code.toBuffer().toString("hex"), network });
-        const pre_tx = await NFT.fetchTXraw(nfttxo.txId, network);
-        const pre_pre_tx = await NFT.fetchTXraw(pre_tx.toObject().inputs[0].prevTxId, network);
 
         const tx = new tbc.Transaction()
             .addInputFromPrevTx(pre_tx, 0)
@@ -208,10 +201,10 @@ class NFT {
             .sign(privateKey)
             .seal()
 
-        return await NFT.broadcastTXraw(tx.uncheckedSerialize());
+        return tx.uncheckedSerialize();
     }
 
-    private static buildCodeScript(tx_hash: string, outputIndex: number): tbc.Script {
+    static buildCodeScript(tx_hash: string, outputIndex: number): tbc.Script {
         const tx_id = Buffer.from(tx_hash, "hex").reverse().toString("hex");
         const writer = new tbc.encoding.BufferWriter();
         const vout = writer.writeUInt32LE(outputIndex).toBuffer().toString("hex");
@@ -220,13 +213,19 @@ class NFT {
         return code;
     };
 
-    private static buildHoldScript(address: string): tbc.Script {
+    static buildMintScript(address: string): tbc.Script {
         const pubKeyHash = tbc.Address.fromString(address).hashBuffer.toString("hex");
-        const hold = new tbc.Script('OP_DUP OP_HASH160' + ' 0x14 0x' + pubKeyHash + ' OP_EQUALVERIFY OP_CHECKSIG OP_RETURN 0x0d 0x5631204d696e74204e486f6c64');
+        const mint = new tbc.Script('OP_DUP OP_HASH160' + ' 0x14 0x' + pubKeyHash + ' OP_EQUALVERIFY OP_CHECKSIG OP_RETURN 0x0d 0x5630204d696e74204e486f6c64');
+        return mint;
+    }
+
+    static buildHoldScript(address: string): tbc.Script {
+        const pubKeyHash = tbc.Address.fromString(address).hashBuffer.toString("hex");
+        const hold = new tbc.Script('OP_DUP OP_HASH160' + ' 0x14 0x' + pubKeyHash + ' OP_EQUALVERIFY OP_CHECKSIG OP_RETURN 0x0d 0x56302043757272204e486f6c64');
         return hold;
     }
 
-    private static buildTapeScript(data: CollectionData | NFTData): tbc.Script {
+    static buildTapeScript(data: CollectionData | NFTData): tbc.Script {
         const dataHex = Buffer.from(JSON.stringify(data)).toString("hex");
         const tape = tbc.Script.fromASM(`OP_FALSE OP_RETURN ${dataHex} 4e54617065`);
         return tape;
@@ -365,222 +364,9 @@ class NFT {
             throw new Error('Length exceeds maximum supported size (4 GB)');
         }
     }
-
-    private static getBaseURL(network: "testnet" | "mainnet"): string {
-        const url_testnet = `http://tbcdev.org:5000/v1/tbc/main/`;
-        const url_mainnet = `https://turingwallet.xyz/v1/tbc/main/`;
-        const base_url = network == "testnet" ? url_testnet : url_mainnet;
-        return base_url;
-    }
-
-    static async fetchTXraw(txid: string, network?: "testnet" | "mainnet"): Promise<tbc.Transaction> {
-        let base_url = "";
-        if (network) {
-            base_url = NFT.getBaseURL(network)
-        } else {
-            base_url = NFT.getBaseURL("mainnet")
-        }
-        const url = base_url + `tx/hex/${txid}`;
-        try {
-            const response = await fetch(url);
-            if (!response.ok) {
-                throw new Error(`Failed to fetch TXraw: ${response.statusText}`);
-            }
-            const rawtx = await response.json();
-            const tx = new tbc.Transaction();
-            tx.fromString(rawtx);
-            return tx;
-        } catch (error) {
-            throw new Error("Failed to fetch TXraw.");
-        }
-    }
-
-    static async broadcastTXraw(txraw: string, network?: "testnet" | "mainnet"): Promise<string> {
-        let base_url = "";
-        if (network) {
-            base_url = NFT.getBaseURL(network)
-        } else {
-            base_url = NFT.getBaseURL("mainnet")
-        }
-        const url = base_url + `broadcast/tx/raw`;
-        try {
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    txHex: txraw
-                })
-            });
-            if (!response.ok) {
-                throw new Error(`Failed to broadcast TXraw: ${response.statusText}`);
-            }
-            const data = await response.json();
-            console.log('txid:', data.result);
-            if (data.error) {
-                console.log('error:', data.error);
-            }
-            return data.result;
-        } catch (error) {
-            throw new Error("Failed to broadcast TXraw.");
-        }
-    }
-
-    static async fetchUTXOs(address: string, network?: "testnet" | "mainnet"): Promise<tbc.Transaction.IUnspentOutput[]> {
-        let base_url = "";
-        if (network) {
-            base_url = NFT.getBaseURL(network)
-        } else {
-            base_url = NFT.getBaseURL("mainnet")
-        }
-        const url = base_url + `address/${address}/unspent/`;
-        try {
-            const response = await fetch(url);
-            if (!response.ok) {
-                throw new Error("Failed to fetch UTXO: ".concat(response.statusText));
-            }
-            const data: { tx_hash: string; tx_pos: number; height: number; value: number; }[] = await response.json();
-
-            const scriptPubKey = tbc.Script.buildPublicKeyHashOut(address).toBuffer().toString('hex');
-
-            return data.map((utxo) => ({
-                txId: utxo.tx_hash,
-                outputIndex: utxo.tx_pos,
-                script: scriptPubKey,
-                satoshis: utxo.value
-            }));
-        } catch (error) {
-            throw new Error("Failed to fetch UTXO.");
-        }
-    }
-
-    static async selectUTXOs(address: string, amount_tbc: number, network?: "testnet" | "mainnet"): Promise<tbc.Transaction.IUnspentOutput[]> {
-        let utxos: tbc.Transaction.IUnspentOutput[] = [];
-        if (network) {
-            utxos = await this.fetchUTXOs(address, network);
-        } else {
-            utxos = await this.fetchUTXOs(address);
-        }
-        utxos.sort((a, b) => a.satoshis - b.satoshis);
-        const amount_satoshis = amount_tbc * Math.pow(10, 6);
-        const closestUTXO = utxos.find(utxo => utxo.satoshis >= amount_satoshis + 50000);
-        if (closestUTXO) {
-            return [closestUTXO];
-        }
-
-        let totalAmount = 0;
-        const selectedUTXOs: tbc.Transaction.IUnspentOutput[] = [];
-
-        for (const utxo of utxos) {
-            totalAmount += utxo.satoshis;
-            selectedUTXOs.push(utxo);
-
-            if (totalAmount >= amount_satoshis + 2000) {
-                break;
-            }
-        }
-
-        if (totalAmount < amount_satoshis + 2000) {
-            throw new Error("Insufficient balance");
-        }
-
-        return selectedUTXOs;
-    }
-
-    static async fetchNFTTXO(params: { script: string, tx_hash?: string, network?: "testnet" | "mainnet" }): Promise<tbc.Transaction.IUnspentOutput> {
-        const { script, tx_hash, network } = params;
-        let base_url = "";
-        if (network) {
-            base_url = NFT.getBaseURL(network)
-        } else {
-            base_url = NFT.getBaseURL("mainnet")
-        }
-        const script_hash = Buffer.from(tbc.crypto.Hash.sha256(Buffer.from(script, "hex")).toString("hex"), "hex").reverse().toString("hex");
-        const url = base_url + `script/hash/${script_hash}/unspent`;
-        try {
-            const response = await fetch(url);
-            if (!response.ok) {
-                throw new Error("Failed to fetch UTXO: ".concat(response.statusText));
-            }
-            const data: { tx_hash: string; tx_pos: number; height: number; value: number; }[] = await response.json();
-            if (tx_hash) {
-                const filteredUTXOs = data.filter(item => item.tx_hash === tx_hash);
-
-                if (filteredUTXOs.length === 0) {
-                    throw new Error('No matching UTXO found.');
-                }
-
-                const min_vout_utxo = filteredUTXOs.reduce((prev, current) =>
-                    prev.tx_pos < current.tx_pos ? prev : current
-                );
-
-                return {
-                    txId: min_vout_utxo.tx_hash,
-                    outputIndex: min_vout_utxo.tx_pos,
-                    script: script,
-                    satoshis: min_vout_utxo.value
-                }
-            } else {
-                return {
-                    txId: data[0].tx_hash,
-                    outputIndex: data[0].tx_pos,
-                    script: script,
-                    satoshis: data[0].value
-                }
-            }
-
-        } catch (error) {
-            throw new Error("Failed to fetch UTXO.");
-        }
-    }
-
-    static async fetchNFTInfo(contract_id: string, network?: "testnet" | "mainnet"): Promise<NFTInfo> {
-        let base_url = "";
-        if (network) {
-            base_url = NFT.getBaseURL(network)
-        } else {
-            base_url = NFT.getBaseURL("mainnet")
-        }
-        const url = base_url + "nft/infos/contract_ids"
-        try {
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    if_icon_needed: true,
-                    nft_contract_list: [contract_id]
-                })
-            });
-            if (!response.ok) {
-                if (!response.ok) {
-                    throw new Error("Failed to fetch NFTInfo: ".concat(response.statusText));
-                }
-            }
-            const data = await response.json();
-
-            const nftInfo: NFTInfo = {
-                collectionId: data.nftInfoList[0].collectionId,
-                collectionIndex: data.nftInfoList[0].collectionIndex,
-                collectionName: data.nftInfoList[0].collectionName,
-                nftCodeBalance: data.nftInfoList[0].nftCodeBalance,
-                nftP2pkhBalance: data.nftInfoList[0].nftP2pkhBalance,
-                nftName: data.nftInfoList[0].nftName,
-                nftSymbol: data.nftInfoList[0].nftSymbol,
-                nftAttributes: data.nftInfoList[0].nftAttributes,
-                nftDescription: data.nftInfoList[0].nftDescription,
-                nftTransferTimeCount: data.nftInfoList[0].nftTransferTimeCount,
-                nftIcon: data.nftInfoList[0].nftIcon
-            }
-
-            return nftInfo;
-        } catch (error) {
-            throw new Error("Failed to fetch NFTInfo.");
-        }
-    }
 }
 
 module.exports = NFT;
-```
+
+
+
