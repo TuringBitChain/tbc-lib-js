@@ -342,11 +342,14 @@ const main = async ()=>{
           attributes: "";
           file?: content; //file可为空，为空引用合集的照片
 	}
-	const collection_id = await tbc.NFT.createCollection(address, privateKey, collection_data, utxos,network);//创建合集
-	const contract_id = await tbc.NFT.createNFT(collection_id,address,privateKey,nft_data, utxos,network);//创建合集下的NFT
+	const txraw1 = await tbc.NFT.createCollection(address, privateKey, collection_data, utxos,network);//创建合集
+    const collection_id = await NFT.broadcastTXraw(txraw1,network);
+	const txraw2 = await tbc.NFT.createNFT(collection_id,address,privateKey,nft_data, utxos,network);//创建合集下的NFT
+    const contract_id = await NFT.broadcastTXraw(txraw2,network);
     const nft = new tbc.NFT(contract_id);
     await nft.initialize();
-     await nft.transferNFT(address_from, address_to, privateKey, utxos,network);//转移nft
+    const txraw3 = await nft.transferNFT(address_from, address_to, privateKey, utxos,network);//转移nft
+    await NFT.broadcastTXraw(txraw3,network);
 }
 	
 main();
