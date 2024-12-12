@@ -1606,7 +1606,7 @@ declare module 'tbc-lib-js' {
         static createCollection(address: string, privateKey: PrivateKey, data: CollectionData, utxos: Transaction.IUnspentOutput[], network?: "testnet" | "mainnet"): Promise<string>;
         static createNFT(collection_id: string, address: string, privateKey: PrivateKey, data: NFTData, utxos: Transaction.IUnspentOutput[], network?: "testnet" | "mainnet"): Promise<string>;
         transferNFT(address_from: string, address_to: string, privateKey: PrivateKey, utxos: Transaction.IUnspentOutput[], network?: "testnet" | "mainnet"): Promise<string>;
-        static encodeByBase64(filePath: string): Promise<string>;
+        // static encodeByBase64(filePath: string): Promise<string>;
         static selectUTXOs(address: string, amount_tbc: number, network?: "testnet" | "mainnet"): Promise<Transaction.IUnspentOutput[]>;
         static broadcastTXraw(txraw: string, network?: "testnet" | "mainnet"): Promise<string>;
     }
