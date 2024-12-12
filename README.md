@@ -9,7 +9,7 @@ Please see ./doc for documents details.
 
 
 A transaction construct demo program:
-```
+```ts
 const Transaction = require('tbc-lib-js/lib/transaction/transaction');
 const PrivateKey = require('tbc-lib-js/lib/privatekey');
 const Address = require('tbc-lib-js/lib/address');
@@ -94,8 +94,42 @@ transaction.sign(privatekey, Signature.SIGHASH_ALL | Signature.SIGHASH_FORKID);
 // Serialize the transaction
 const serializedTransaction = transaction.serialize();
 console.log('Serialized Transaction:', serializedTransaction);
-
-
+```
+NFT
+===
+```ts
+import * as tbc from "tbc-lib-js"
+const privateKey = tbc.PrivateKey.fromString("");
+const address = privateKey.toAddress().toString();
+const network = "testnet"  //network参数若不存在，默认为主网
+//const network = "mainnet" 
+const main = async ()=>{
+	const utxos = await tbc.NFT.selectUTXOs(address,amount_tbc,network);
+	const content = await tbc.NFT.encodeByBase64(filePath);
+	const collection_data = {
+    	collectionName: "";
+    	description: "";
+    	supply: 10;
+    	file: content;
+	};
+	const nft_data = {
+    	  nftName: "";
+   		  symbol: "";
+          discription: "";
+          attributes: "";
+          file?: content; //file可为空，为空引用合集的照片
+	}
+	const txraw1 = await tbc.NFT.createCollection(address, privateKey, collection_data, utxos,network);//创建合集
+    const collection_id = await NFT.broadcastTXraw(txraw1,network);
+	const txraw2 = await tbc.NFT.createNFT(collection_id,address,privateKey,nft_data, utxos,network);//创建合集下的NFT
+    const contract_id = await NFT.broadcastTXraw(txraw2,network);
+    const nft = new tbc.NFT(contract_id);
+    await nft.initialize();
+    const txraw3 = await nft.transferNFT(address_from, address_to, privateKey, utxos,network);//转移nft
+    await NFT.broadcastTXraw(txraw3,network);
+}
+	
+main();
 ```
 
 Create FT
@@ -201,10 +235,10 @@ async function main() {
         const poolUse = new poolNFT(poolNftContractId);
         await poolUse.initfromContractId();
 
-        //Step 2.1: 为刚创建的poolNFT注入初始资金。传入参数:TBC数量、FT数量、要换取的LP数量，当前设定池中初始LP数量等于注入的TBC数量
+        //Step 2.1: 为刚创建的poolNFT注入初始资金。传入参数:TBC数量、FT数量，当前设定池中初始LP数量等于注入的TBC数量
         let tbc = 30;
         let fta = 1000;
-        let tx2 = await poolUse.initPoolNFT(privateKeyA, addressA, lp, tbc, fta);
+        let tx2 = await poolUse.initPoolNFT(privateKeyA, addressA, tbc, fta);
         await poolUse.broadcastTXraw(tx2);
 
         //Step 2.2: 为已完成初始资金注入的poolNFT添加流动性。传入参数:向池中添加的TBC数量(会同步计算需要添加的Token数量)，要求添加至少0.1个TBC
@@ -238,7 +272,7 @@ Multisig
 ===
 //构造Multisig实例对象
 
-```
+```ts
 //当从多签地址转移ft时，将ft对象作为属性传入 network默认主网
 const object = new Multisig({
 	ft?:FT
@@ -248,7 +282,7 @@ const object = new Multisig({
 
 //创建多签钱包
 
-```
+```ts
 //address_from为普通p2pkh地址
 //signatureCount为1-6
 //publicKeyCount为3-10
@@ -259,13 +293,13 @@ await multisig.createMultisigWalletTransaction(address_from, pubkeys, signatureC
 
 //多签地址的计算
 
-```
+```ts
 Multisig.createMultisigAddress(pubkeys,signatureCount,signatureCount)
 ```
 
 //p2pkh地址转移tbc到多签地址
 
-```
+```ts
 const multisig = new Multisig({ network: "testnet" })
 //address_from为普通p2pkh地址
 //address_to为多签地址
@@ -274,7 +308,7 @@ await multisig.createP2pkhToMultisigTransaction(address_from, address_to, amount
 
 //多签地址转移tbc到p2pkh地址或多签地址
 
-```
+```ts
 //multiTxraw类型
 interface MultiTxRaw {
     txraw: string;
@@ -293,7 +327,7 @@ await multisig.createFromMultisigTransaction(txraw, sigs, pubkeys);
 
 //p2pkh地址转移ft到多签地址
 
-```
+```ts
 const Token = new FT(contract_id); //ft文件里改成测试网
 await Token.initialize();
 const multisig = new Multisig({ ft：Token，network: "testnet" })
@@ -303,7 +337,7 @@ await multisig.p2pkhToMultiFtTransfer(privateKey, address_to, 0.1)
 
 //多签地址转移ft到p2pkh地址或多签地址
 
-```
+```ts
 const Token = new FT(contract_id); //ft文件里改成测试网
 await Token.initialize();
 const multisig = new Multisig({ ft：Token，network: "testnet" })
@@ -319,38 +353,4 @@ for (let i = 0; i < sig1.length; i++) {
         sigs[i] = [sig1[i], sig2[i], sig3[i],...];
 }
 await multisig.createFromMultisigTransferFTTransaction(txraw, sigs, pubkeys);
-
-//NFT
-import * as tbc from "tbc-lib-js"
-const privateKey = tbc.PrivateKey.fromString("");
-const address = privateKey.toAddress().toString();
-const network = "testnet"  //network参数若不存在，默认为主网
-//const network = "mainnet" 
-const main = async ()=>{
-	const utxos = await tbc.NFT.selectUTXOs(address,amount_tbc,network);
-	const content = await tbc.NFT.encodeByBase64(filePath);
-	const collection_data = {
-    	collectionName: "";
-    	description: "";
-    	supply: 10;
-    	file: content;
-	};
-	const nft_data = {
-    	  nftName: "";
-   		  symbol: "";
-          discription: "";
-          attributes: "";
-          file?: content; //file可为空，为空引用合集的照片
-	}
-	const txraw1 = await tbc.NFT.createCollection(address, privateKey, collection_data, utxos,network);//创建合集
-    const collection_id = await NFT.broadcastTXraw(txraw1,network);
-	const txraw2 = await tbc.NFT.createNFT(collection_id,address,privateKey,nft_data, utxos,network);//创建合集下的NFT
-    const contract_id = await NFT.broadcastTXraw(txraw2,network);
-    const nft = new tbc.NFT(contract_id);
-    await nft.initialize();
-    const txraw3 = await nft.transferNFT(address_from, address_to, privateKey, utxos,network);//转移nft
-    await NFT.broadcastTXraw(txraw3,network);
-}
-	
-main();
 ```
