@@ -164,15 +164,10 @@ export class FT {
         const amountbn = BigInt(amount * Math.pow(10, decimal));
 
         // Fetch FT UTXO for the transfer
-        const fttxo_1 = await this.fetchFtTXO(this.contractTxid, privateKey.toAddress().toString(), amountbn);
-        if (fttxo_1.ftBalance === undefined) {
-            throw new Error('ftBalance is undefined');
-        }
-        tapeAmountSetIn.push(fttxo_1.ftBalance);
-
-        // Calculate the total available balance
+        const ftutxos = await this.fetchFtUTXOs(this.contractTxid, privateKey.toAddress().toString(), amountbn);
         let tapeAmountSum = BigInt(0);
-        for (let i = 0; i < tapeAmountSetIn.length; i++) {
+        for (let i = 0; i < ftutxos.length; i++) {
+            tapeAmountSetIn.push(ftutxos[i].ftBalance!);
             tapeAmountSum += BigInt(tapeAmountSetIn[i]);
         }
 
@@ -201,7 +196,7 @@ export class FT {
 
         // Construct the transaction
         const tx = new tbc.Transaction()
-            .from(fttxo_1)
+            .from(ftutxos)
             .from(utxo);
 
         // Build the code script for the recipient
@@ -237,13 +232,14 @@ export class FT {
         tx.change(privateKey.toAddress());
 
         // Set the input script asynchronously for the FT UTXO
-        await tx.setInputScriptAsync({
-            inputIndex: 0,
-        }, async (tx) => {
-            const unlockingScript = await this.getFTunlock(privateKey, tx, 0, fttxo_1.txId, fttxo_1.outputIndex);
-            return unlockingScript;
-        });
-
+        for (let i = 0; i < ftutxos.length; i++) {
+            await tx.setInputScriptAsync({
+                inputIndex: i,
+            }, async (tx) => {
+                const unlockingScript = await this.getFTunlock(privateKey, tx, i, ftutxos[i].txId, ftutxos[i].outputIndex);
+                return unlockingScript;
+            });
+        }
         tx.sign(privateKey);
         await tx.sealAsync();
         const txraw = tx.uncheckedSerialize();
@@ -256,7 +252,7 @@ export class FT {
      * @returns The transaction object.
      */
     async fetchTXraw(txid: string): Promise<tbc.Transaction> {
-        const url_testnet = `http://tbcdev.org:5000/v1/tbc/main/tx/hex/${txid}`;
+        const url_testnet = `https://tbcdev.org/v1/tbc/main/tx/hex/${txid}`;
         const url_mainnet = `https://turingwallet.xyz/v1/tbc/main/tx/hex/${txid}`;
         let url = url_testnet;
         if (network === tbc.Networks.testnet) {
@@ -285,7 +281,7 @@ export class FT {
      * @returns The response from the broadcast API.
      */
     async broadcastTXraw(txraw: string): Promise<string> {
-        const url_testnet = 'http://tbcdev.org:5000/v1/tbc/main/broadcast/tx/raw';
+        const url_testnet = 'https://tbcdev.org/v1/tbc/main/broadcast/tx/raw';
         const url_mainnet = 'https://turingwallet.xyz/v1/tbc/main/broadcast/tx/raw';
         let url = url_testnet;
         if (network === tbc.Networks.testnet) {
@@ -338,7 +334,7 @@ export class FT {
             }
             hash = addressOrHash + '01';
         }
-        const url_testnet = `http://tbcdev.org:5000/v1/tbc/main/ft/utxo/combine/script/${hash}/contract/${contractTxid}`;
+        const url_testnet = `https://tbcdev.org/v1/tbc/main/ft/utxo/combine/script/${hash}/contract/${contractTxid}`;
         const url_mainnet = `https://turingwallet.xyz/v1/tbc/main/ft/utxo/combine/script/${hash}/contract/${contractTxid}`;
         let url = url_testnet;
         if (network === tbc.Networks.testnet) {
@@ -378,6 +374,75 @@ export class FT {
         }
     }
 
+    async fetchFtUTXOs(contractTxid: string, addressOrHash: any, amount: bigint): Promise<tbc.Transaction.IUnspentOutput[]> {
+        interface FTUnspentOutput {
+            utxoId: string;
+            utxoVout: number;
+            utxoBalance: number;
+            ftContractId: string;
+            ftBalance: bigint;
+        }
+        let hash = '';
+        if (tbc.Address.isValid(addressOrHash)) {
+            // If the recipient is an address
+            const publicKeyHash = tbc.Address.fromString(addressOrHash).hashBuffer.toString('hex');
+            hash = publicKeyHash + '00';
+        } else {
+            // If the recipient is a hash
+            if (addressOrHash.length !== 40) {
+                throw new Error('Invalid address or hash');
+            }
+            hash = addressOrHash + '01';
+        }
+        const url_testnet = `https://tbcdev.org/v1/tbc/main/ft/utxo/combine/script/${hash}/contract/${contractTxid}`;
+        const url_mainnet = `https://turingwallet.xyz/v1/tbc/main/ft/utxo/combine/script/${hash}/contract/${contractTxid}`;
+        let url = url_testnet;
+        if (network === tbc.Networks.testnet) {
+            url = url_testnet
+        } else if (network === tbc.Networks.mainnet) {
+            url = url_mainnet
+        }
+        try {
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+            if (!response.ok) {
+                throw new Error(`Failed to fetch from URL: ${url}, status: ${response.status}`);
+            }
+            const codeScript = this.buildFTtransferCode(this.codeScript, addressOrHash).toBuffer().toString('hex');
+            const responseData = await response.json();
+            let sortedData: FTUnspentOutput[] = responseData.ftUtxoList.sort((a: FTUnspentOutput, b: FTUnspentOutput) => b.ftBalance - a.ftBalance);
+            let sumBalance = BigInt(0);
+            let ftutxos: tbc.Transaction.IUnspentOutput[] = [];
+            for (let i = 0; i < sortedData.length && i < 5; i++) {
+                sumBalance += BigInt(sortedData[i].ftBalance);
+                ftutxos.push({
+                    txId: sortedData[i].utxoId,
+                    outputIndex: sortedData[i].utxoVout,
+                    script: codeScript,
+                    satoshis: sortedData[i].utxoBalance,
+                    ftBalance: sortedData[i].ftBalance
+                });
+                if (sumBalance >= amount) {
+                    break;
+                }
+            }
+            if (sumBalance < amount) {
+                const totalBalance = await FT.getFTbalance(contractTxid, addressOrHash);
+                if (totalBalance >= amount) {
+                    throw new Error('Insufficient FTbalance, please merge FT UTXOs');
+                }
+            }
+            return ftutxos;
+        } catch (error) {
+            console.log(error);
+            throw new Error("Failed to fetch FTUTXO.");
+        }
+    }
+
     /**
      * Fetches the FT information for a given contract transaction ID.
      *
@@ -386,7 +451,7 @@ export class FT {
      * @throws {Error} Throws an error if the request to fetch FT information fails.
      */
     async fetchFtInfo(contractTxid: string): Promise<FtInfo> {
-        const url_testnet = `http://tbcdev.org:5000/v1/tbc/main/ft/info/contract/id/${contractTxid}`;
+        const url_testnet = `https://tbcdev.org/v1/tbc/main/ft/info/contract/id/${contractTxid}`;
         const url_mainnet = `https://turingwallet.xyz/v1/tbc/main/ft/info/contract/id/${contractTxid}`;
         let url = url_testnet;
         if (network === tbc.Networks.testnet) {
@@ -430,7 +495,7 @@ export class FT {
         const privateKey = privateKey_from;
         const address = privateKey.toAddress().toString();
         const contractTxid = this.contractTxid;
-        const url_testnet = `http://tbcdev.org:5000/v1/tbc/main/ft/utxo/address/${address}/contract/${contractTxid}`;
+        const url_testnet = `https://tbcdev.org/v1/tbc/main/ft/utxo/address/${address}/contract/${contractTxid}`;
         const url_mainnet = `https://turingwallet.xyz/v1/tbc/main/ft/utxo/address/${address}/contract/${contractTxid}`;
         let url = url_testnet;
         if (network === tbc.Networks.testnet) {
@@ -499,8 +564,8 @@ export class FT {
             const txraw = tx.uncheckedSerialize();
             console.log('Merge FTUTXO:');
             await this.broadcastTXraw(txraw);
-            // wait 10 seconds
-            await new Promise(resolve => setTimeout(resolve, 10000));
+            // wait 5 seconds
+            await new Promise(resolve => setTimeout(resolve, 5000));
             await this.mergeFT(privateKey);
             return true;
         } catch (error) {
@@ -529,7 +594,7 @@ export class FT {
             }
             hash = addressOrHash + '01';
         }
-        const url_testnet = `http://tbcdev.org:5000/v1/tbc/main/ft/balance/combine/script/${hash}/contract/${contractTxid}`;
+        const url_testnet = `https://tbcdev.org/v1/tbc/main/ft/balance/combine/script/${hash}/contract/${contractTxid}`;
         const url_mainnet = `https://turingwallet.xyz/v1/tbc/main/ft/balance/combine/script/${hash}/contract/${contractTxid}`;
         let url = url_testnet;
         if (network === tbc.Networks.testnet) {
@@ -552,7 +617,7 @@ export class FT {
      * @returns The UTXO with sufficient balance.
      */
     async fetchUTXO(address: any): Promise<tbc.Transaction.IUnspentOutput> {
-        const url_testnet = `http://tbcdev.org:5000/v1/tbc/main/address/${address}/unspent/`;
+        const url_testnet = `https://tbcdev.org/v1/tbc/main/address/${address}/unspent/`;
         const url_mainnet = `https://turingwallet.xyz/v1/tbc/main/address/${address}/unspent/`;
         let url = url_testnet;
         if (network === tbc.Networks.testnet) {
@@ -1130,4 +1195,5 @@ export function getSize(length: number): Buffer {
         return Buffer.from(length.toString(16).padStart(4, '0'), 'hex').reverse();
     }
 }
+
 ```
