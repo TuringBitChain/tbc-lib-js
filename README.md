@@ -154,7 +154,7 @@ import { FT } from 'tbc-lib-js'
  * Step 1: Set up the wallet private key and address.
  * This private key will be used to sign the transaction.
  */
-const privateKeyA = tbc.PrivateKey.fromString('L1u2TmR7hMMMSV9Bx2Lyt3sujbboqEFqnKygnPRnQERhKB4qptuK');
+const privateKeyA = tbc.PrivateKey.fromString('');
 const publicKeyA = tbc.PublicKey.fromPrivateKey(privateKeyA);
 const addressA = tbc.Address.fromPrivateKey(privateKeyA).toString();
 
@@ -194,7 +194,7 @@ async function main() {
         const Token = new FT('ee8d97e5953a6843c3269a7ce3ae4c5264b7af8539fa07764a7f0cf260bf5eb5'); // Step 5.1: Initialize token with contract TXID
         await Token.initialize(); // Step 5.2: Initialize token parameters
         const transferTX = await Token.transfer(privateKeyA, addressB, 0.02); // Step 5.3: Create transfer transaction
-        await Token.mergeFT(privateKeyA); // Step 5.3.1: If ft balance of address is enough but each fttxos balance is not enough, should execute mergeFT before transfer
+        await Token.mergeFT(privateKeyA); // Step 5.3.1: If ft balance of address is enough but selected ftutxos balance is not enough, should execute mergeFT before transfer
         await Token.broadcastTXraw(transferTX); // Step 5.4: Broadcast transfer transaction
 
 
@@ -205,10 +205,10 @@ async function main() {
 
 main();
 ```
-Explanation: UTXO refers to the output of P2PKH, which provides fees for transactions. Fttxo refers to the output of storing ft contract code.
+Explanation: UTXO refers to the output of P2PKH, which provides fees for transactions. Ftutxo refers to the output of storing ft contract code.
 
-The FT SDK only provides basic UTXO retrieval, which means adding only one UTXO and FTTXO for transactions. To better build transactions, developers are advised to learn how to manage UTXO locally. If there is insufficient transaction fee or FT amount, please try checking the balance from the API. If the balance is sufficient, you can merge UTXO or FTTXO. 
-`Note:When manually adding, ensure that the utxo input is after the fttxo input.`
+The FT SDK only provides basic UTXO retrieval, which means adding only one UTXO and up to five FTUTXO for transactions. To better build transactions, developers are advised to learn how to manage UTXO locally. If there is insufficient transaction fee or FT amount, please try checking the balance from the API. If the balance is sufficient, you can merge UTXO or FTUTXO. 
+`Note:When manually adding, ensure that the utxo input is after the ftutxo input.`
 
 
 poolNFT
@@ -218,7 +218,7 @@ import * as tbc from 'tbc-lib-js';
 import { poolNFT } from 'tbc-lib-js';
 
 //测试链私钥
-const privateKeyA = tbc.PrivateKey.fromString('L1u2TmR7hMMMSV9Bx2Lyt3sujbboqEFqnKygnPRnQERhKB4qptuK');
+const privateKeyA = tbc.PrivateKey.fromString('');
 const publicKeyA = tbc.PublicKey.fromPrivateKey(privateKeyA);
 const addressA = tbc.Address.fromPrivateKey(privateKeyA).toString();
 
