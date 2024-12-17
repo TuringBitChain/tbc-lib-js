@@ -94,7 +94,8 @@ export class FT {
         const name = this.name;
         const symbol = this.symbol;
         const decimal = this.decimal;
-        const totalSupply = BigInt(this.totalSupply * Math.pow(10, decimal));
+        const factor = new BigNumber(Math.pow(10, decimal));
+        const totalSupply = BigInt(new BigNumber(this.totalSupply).multipliedBy(new BigNumber(factor)).decimalPlaces(0));
         const privateKey = privateKey_from;
 
         // Prepare the amount in BN format and write it into a buffer
@@ -161,7 +162,8 @@ export class FT {
         if (amount < 0) {
             throw new Error('Invalid amount');
         }
-        const amountbn = BigInt(amount * Math.pow(10, decimal));
+        const factor = new BigNumber(Math.pow(10, decimal));
+        const amountbn = BigInt(new BigNumber(amount).multipliedBy(new BigNumber(factor)).decimalPlaces(0));
 
         // Fetch FT UTXO for the transfer
         const ftutxos = await this.fetchFtUTXOs(this.contractTxid, privateKey.toAddress().toString(), amountbn);
