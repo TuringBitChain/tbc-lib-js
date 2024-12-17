@@ -56,7 +56,9 @@ export class poolNFT {
                 throw new Error("Invalid number.")
             }
             this.ft_a_amount = BigInt(0);
-            this.tbc_amount = BigInt(txidOrParams.tbc_amount * Math.pow(10, 6));
+            const factor    = new BigNumber(Math.pow(10, 6));
+            this.tbc_amount = BigInt(new BigNumber(txidOrParams.tbc_amount).
+                                    multipliedBy(new BigNumber(factor)).decimalPlaces(0));
             this.ft_lp_amount = this.tbc_amount;
             this.ft_a_number = txidOrParams.ft_a;
             this.ft_a_contractTxid = txidOrParams.ftContractTxid;
@@ -67,7 +69,9 @@ export class poolNFT {
         if (!ftContractTxid && this.ft_a_contractTxid != '') {
             const FTA = new FT(this.ft_a_contractTxid);
             await FTA.initialize();
-            this.ft_a_amount = BigInt(this.ft_a_number * Math.pow(10, FTA.decimal));
+            const factor    = new BigNumber(Math.pow(10, FTA.decimal));
+            this.ft_a_amount = BigInt(new BigNumber(this.ft_a_number).
+                                    multipliedBy(new BigNumber(factor)).decimalPlaces(0));
         } else if (ftContractTxid) {
             this.ft_a_contractTxid = ftContractTxid;
         } else {
@@ -127,11 +131,14 @@ export class poolNFT {
         await FTA.initialize();
         let amount_lpbn = BigInt(0);
         if (tbc_amount && ft_a) {
-            amount_lpbn = BigInt(tbc_amount * Math.pow(10, 6));
-            this.tbc_amount = BigInt(tbc_amount * Math.pow(10, 6));
+            const factor = new BigNumber(Math.pow(10, 6));
+            amount_lpbn = BigInt(new BigNumber(tbc_amount).multipliedBy(new BigNumber(factor)).decimalPlaces(0));
+            const factor = new BigNumber(Math.pow(10, 6));
+            this.tbc_amount = BigInt(new BigNumber(tbc_amount).multipliedBy(new BigNumber(factor)).decimalPlaces(0));
             this.ft_lp_amount = this.tbc_amount;
             this.ft_a_number = ft_a;
-            this.ft_a_amount = BigInt(this.ft_a_number * Math.pow(10, FTA.decimal));
+            const factor = new BigNumber(Math.pow(10, FTA.decimal));
+            this.tbc_amount = BigInt(new BigNumber(this.ft_a_number).multipliedBy(new BigNumber(factor)).decimalPlaces(0));
         } else if (!tbc_amount && !ft_a && this.tbc_amount != BigInt(0) && this.ft_a_amount != BigInt(0)) {
             amount_lpbn = BigInt(this.tbc_amount);
             this.tbc_amount = this.tbc_amount;
@@ -252,7 +259,8 @@ export class poolNFT {
         const privateKey = privateKey_from;
         const FTA = new FT(this.ft_a_contractTxid);
         await FTA.initialize();
-        const amount_tbcbn = BigInt(amount_tbc * Math.pow(10, 6));
+        const factor        = new BigNumber(Math.pow(10, 6));
+        const amount_tbcbn  = BigInt(new BigNumber(amount_tbc).multipliedBy(new BigNumber(factor)).decimalPlaces(0));
         const changeDate = this.updatePoolNFT(amount_tbc, FTA.decimal, 2);
         const poolnft_codehash = tbc.crypto.Hash.sha256(Buffer.from(this.poolnft_code, 'hex'));
         const poolnft_codehash160 = tbc.crypto.Hash.sha256ripemd160(poolnft_codehash).toString('hex');
@@ -366,7 +374,8 @@ export class poolNFT {
         const privateKey = privateKey_from;
         const FTA = new FT(this.ft_a_contractTxid);
         await FTA.initialize();
-        const amount_lpbn = BigInt(amount_lp * Math.pow(10, 6));
+        const factor = new BigNumber(Math.pow(10, 6));
+        const amount_lpbn = BigInt(new BigNumber(amount_lp).multipliedBy(new BigNumber(factor)).decimalPlaces(0));
         if (this.ft_lp_amount < amount_lpbn) {
             throw new Error('Invalid FT-LP amount input');
         }
@@ -518,7 +527,8 @@ export class poolNFT {
         const privateKey = privateKey_from;
         const FTA = new FT(this.ft_a_contractTxid);
         await FTA.initialize();
-        const amount_tbcbn = BigInt(amount_tbc * Math.pow(10, 6));
+        const factor = new BigNumber(Math.pow(10, 6));
+        const amount_tbcbn = BigInt(new BigNumber(amount_tbc).multipliedBy(new BigNumber(factor)).decimalPlaces(0));
         if (this.tbc_amount < amount_tbcbn) {
             throw new Error('Invalid tbc amount input');
         }
@@ -615,7 +625,8 @@ export class poolNFT {
         const privateKey = privateKey_from;
         const FTA = new FT(this.ft_a_contractTxid);
         await FTA.initialize();
-        const amount_ftbn = BigInt(amount_token * Math.pow(10, FTA.decimal));
+        const factor = new BigNumber(Math.pow(10, FTA.decimal));
+        const amount_ftbn = BigInt(new BigNumber(amount_token).multipliedBy(new BigNumber(factor)).decimalPlaces(0));
         if (this.ft_a_amount < amount_ftbn) {
             throw new Error('Invalid FT-A amount input');
         }
@@ -711,7 +722,8 @@ export class poolNFT {
         const privateKey = privateKey_from;
         const FTA = new FT(this.ft_a_contractTxid);
         await FTA.initialize();
-        const amount_ftbn = BigInt(amount_token * Math.pow(10, FTA.decimal));
+        const factor = new BigNumber(Math.pow(10, FTA.decimal));
+        const amount_ftbn = BigInt(new BigNumber(amount_token).multipliedBy(new BigNumber(factor)).decimalPlaces(0));
         if (this.ft_a_amount < amount_ftbn) {
             throw new Error('Invalid FT-A amount input');
         }
@@ -822,7 +834,8 @@ export class poolNFT {
         const privateKey = privateKey_from;
         const FTA = new FT(this.ft_a_contractTxid);
         await FTA.initialize();
-        const amount_tbcbn = BigInt(amount_tbc * Math.pow(10, 6));
+        const factor = new BigNumber(Math.pow(10, 6));
+        const amount_tbcbn = BigInt(new BigNumber(amount_tbc).multipliedBy(new BigNumber(factor)).decimalPlaces(0));
         if (this.tbc_amount < amount_tbcbn) {
             throw new Error('Invalid tbc amount input');
         }
@@ -1257,13 +1270,16 @@ export class poolNFT {
         const ft_lp_old = this.ft_lp_amount;
         const tbc_amount_old = this.tbc_amount;
         if (option == 1) {
-            const ftLpIncrement = BigInt(increment * Math.pow(10, 6));
+            const factor = new BigNumber(Math.pow(10, 6));
+            const ftLpIncrement = BigInt(new BigNumber(increment).multipliedBy(new BigNumber(factor)).decimalPlaces(0));
             this.updateWhenFtLpChange(ftLpIncrement);
         } else if (option == 2) {
-            const tbcIncrement = BigInt(increment * Math.pow(10, 6));
+            const factor = new BigNumber(Math.pow(10, 6));
+            const tbcIncrement = BigInt(new BigNumber(increment).multipliedBy(new BigNumber(factor)).decimalPlaces(0));
             this.updateWhenTbcAmountChange(tbcIncrement);
         } else {
-            const ftAIncrement = BigInt(increment * Math.pow(10, ft_a_decimal));
+            const factor = new BigNumber(Math.pow(10, ft_a_decimal));
+            const ftAIncrement = BigInt(new BigNumber(increment).multipliedBy(new BigNumber(factor)).decimalPlaces(0));
             this.updateWhenFtAChange(ftAIncrement);
         }
         if (this.tbc_amount > tbc_amount_old) {

@@ -409,7 +409,8 @@ class Multisig {
         if (amount < 0) {
             throw new Error('Invalid amount');
         }
-        const amountbn = BigInt(amount * Math.pow(10, decimal));
+        const factor    = new BigNumber(Math.pow(10, decimal));
+        const amountbn  = BigInt(new BigNumber(amount).multipliedBy(new BigNumber(factor)).decimalPlaces(0));
 
         const hash = crypto.Hash.sha256ripemd160(crypto.Hash.sha256(Script.fromASM(Multisig.getMultisigLockScript(address_to)).toBuffer())).toString("hex");
 
@@ -512,7 +513,8 @@ class Multisig {
         if (amount < 0) {
             throw new Error('Invalid amount');
         }
-        const amountbn = BigInt(amount * Math.pow(10, decimal));
+        const factor = new BigNumber(Math.pow(10, decimal));
+        const amountbn = BigInt(new BigNumber(amount).multipliedBy(new BigNumber(factor)).decimalPlaces(0));
 
         const hash_from = crypto.Hash.sha256ripemd160(crypto.Hash.sha256(Script.fromASM(Multisig.getMultisigLockScript(address_from)).toBuffer())).toString("hex");
 
