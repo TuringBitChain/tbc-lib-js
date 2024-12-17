@@ -138,7 +138,7 @@ export class poolNFT {
             this.ft_lp_amount = this.tbc_amount;
             this.ft_a_number = ft_a;
             const factor = new BigNumber(Math.pow(10, FTA.decimal));
-            this.tbc_amount = BigInt(new BigNumber(this.ft_a_number).multipliedBy(new BigNumber(factor)).decimalPlaces(0));
+            this.ft_a_amount = BigInt(new BigNumber(this.ft_a_number).multipliedBy(new BigNumber(factor)).decimalPlaces(0));
         } else if (!tbc_amount && !ft_a && this.tbc_amount != BigInt(0) && this.ft_a_amount != BigInt(0)) {
             amount_lpbn = BigInt(this.tbc_amount);
             this.tbc_amount = this.tbc_amount;
