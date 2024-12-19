@@ -1532,6 +1532,7 @@ declare module 'tbc-lib-js' {
         MintFT(privateKey_from: PrivateKey, address_to: string): Promise<string>;
         transfer(privateKey_from: PrivateKey, address_to: string, amount: number): Promise<string>;
         broadcastTXraw(txraw: string): Promise<string>;
+        mergeFT(privateKey_from: PrivateKey): Promise<boolean>;
     }
 
     interface MultiTxRaw {
