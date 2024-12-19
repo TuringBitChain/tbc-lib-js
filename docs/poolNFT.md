@@ -556,7 +556,7 @@ export class poolNFT {
         const utxo = await FTA.fetchUTXO(privateKey.toAddress().toString());
         // await mergeUTXO(privateKey)
         // await new Promise(resolve => setTimeout(resolve, 10000));
-        if (BigInt(utxo.satoshis) < amount_tbc) {
+        if (utxo.satoshis < Number(amount_tbcbn)) {
             throw new Error('Insufficient TBC amount, please merge UTXOs');
         }
         const poolnft = await this.fetchPoolNftUTXO(this.contractTxid);
@@ -653,7 +653,7 @@ export class poolNFT {
         // Build the amount and change hex strings for the tape
         const { amountHex, changeHex } = FTA.buildTapeAmount(amount_ftbn, tapeAmountSetIn, 2);
         const utxo = await FTA.fetchUTXO(privateKey.toAddress().toString());
-        if (BigInt(utxo.satoshis) < tbc_amount_increment) {
+        if (utxo.satoshis < Number(tbc_amount_increment)) {
             throw new Error('Insufficient TBC amount, please merge UTXOs');
         }
         const poolnft = await this.fetchPoolNftUTXO(this.contractTxid);
@@ -1150,7 +1150,7 @@ export class poolNFT {
         const privateKey = privateKey_from;
         const address = privateKey.toAddress().toString();
         const ftlpCodeScript = this.getFTLPcode(tbc.crypto.Hash.sha256(Buffer.from(this.poolnft_code,'hex')).toString('hex'), address, FTA.tapeScript.length / 2);
-        const ftlpCodeHash = tbc.crypto.Hash.sha256(ftlpCodeScript.toBuffer());
+        const ftlpCodeHash = tbc.crypto.Hash.sha256(ftlpCodeScript.toBuffer()).reverse().toString('hex');
         const url_testnet = `https://tbcdev.org/v1/tbc/main/ft/lp/unspent/by/script/hash${ftlpCodeHash}`;
         const url_mainnet = `https://turingwallet.xyz/v1/tbc/main/ft/lp/unspent/by/script/hash${ftlpCodeHash}`;
         let url = url_testnet;
