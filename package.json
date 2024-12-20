@@ -1,12 +1,12 @@
 {
   "name": "tbc-lib-js",
-  "version": "1.0.13",
+  "version": "1.0.15",
   "description": "A library for tbc functionality",
   "author": "Austin <austinwang149@gmail.com>",
   "ide": true,
   "main": "index.js",
-  "unpkg": "tbc.min.js",
   "keywords": [
+    "tbc",
     "bitcoin",
     "transaction",
     "address",
@@ -19,8 +19,7 @@
     "bip32",
     "bip37",
     "bip69",
-    "bip70",
-    "multisig"
+    "bip70"
   ],
   "repository": "https://github.com/TuringBitChain/tbc-lib-js.git",
   "browser": {
