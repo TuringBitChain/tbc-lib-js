@@ -608,7 +608,10 @@ declare module 'tbc-lib-js' {
     }
 
     export namespace encoding {
-        class Base58 { }
+        class Base58 { 
+            static encode(buf:Buffer):string;
+            static decode(str:string):Buffer;
+        }
         class Base58Check { }
         class BufferReader {
             constructor(buf: Buffer);
