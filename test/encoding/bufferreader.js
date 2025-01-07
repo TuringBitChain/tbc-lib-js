@@ -169,10 +169,10 @@ describe('BufferReader', function () {
     })
 
     it('should return 10 TBC', function () {
-      var tenbsv = 10 * 1e8
-      var tenbsvBuffer = Buffer.from('00ca9a3b00000000', 'hex')
-      var br = new BufferReader(tenbsvBuffer)
-      br.readUInt64LEBN().toNumber().should.equal(tenbsv)
+      var tentbc = 10 * 1e8
+      var tentbcBuffer = Buffer.from('00ca9a3b00000000', 'hex')
+      var br = new BufferReader(tentbcBuffer)
+      br.readUInt64LEBN().toNumber().should.equal(tentbc)
     })
 
     it('should return 2^30', function () {

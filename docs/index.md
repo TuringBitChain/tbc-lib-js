@@ -31,18 +31,6 @@ To get started, just `npm install tbc-lib-js`.
 ## Module Development
 * [Browser Builds](browser.md)
 
-## Modules
-
-Some functionality is implemented as a module that can be installed separately:
-
-* [Payment Protocol Support](https://github.com/bitpay/bsv-payment-protocol)
-* [Peer to Peer Networking](https://github.com/bitpay/bsv-p2p)
-* [Bitcoin Core JSON-RPC](https://github.com/bitpay/bitcoind-rpc)
-* [Payment Channels](https://github.com/bitpay/bsv-channel)
-* [Mnemonics](https://github.com/bitpay/bsv-mnemonic)
-* [Elliptical Curve Integrated Encryption Scheme](https://github.com/bitpay/bsv-ecies)
-* [Blockchain Explorers](https://github.com/bitpay/bsv-explorers)
-* [Signed Messages](https://github.com/bitpay/bsv-message)
 
 # Examples
 
