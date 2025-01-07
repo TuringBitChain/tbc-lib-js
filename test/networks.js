@@ -138,10 +138,10 @@ describe('Networks', function () {
     networks.disableRegtest()
     expect(network.cashAddrPrefix).to.equal('bchtest')
   })
-  it('should have bsvstn cashAddrPrefix after enableStn is called', function () {
+  it('should have tbcstn cashAddrPrefix after enableStn is called', function () {
     var network = networks.get('testnet')
     networks.enableStn()
-    expect(network.cashAddrPrefix).to.equal('bsvstn')
+    expect(network.cashAddrPrefix).to.equal('tbcstn')
   })
 
   it('should have bchtest cashAddrPrefix after disableStn is called', function () {
