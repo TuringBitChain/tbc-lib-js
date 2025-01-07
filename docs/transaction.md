@@ -75,7 +75,7 @@ transaction.applySignature(receivedSig);
 ```
 
 ## Adding inputs
-Transaction inputs are instances of either [Input](https://github.com/bitpay/bsv/tree/master/lib/transaction/input) or its subclasses. `Input` has some abstract methods, as there is no actual concept of a "signed input" in the bitcoin scripting system (just valid signatures for <tt>OP_CHECKSIG</tt> and similar opcodes). They are stored in the `input` property of `Transaction` instances.
+Transaction inputs are instances of either [Input] or its subclasses. `Input` has some abstract methods, as there is no actual concept of a "signed input" in the bitcoin scripting system (just valid signatures for <tt>OP_CHECKSIG</tt> and similar opcodes). They are stored in the `input` property of `Transaction` instances.
 
 Bitcore contains two implementations of `Input`, one for spending _Pay to Public Key Hash_ outputs (called `PublicKeyHashInput`) and another to spend _Pay to Script Hash_ outputs for which the redeem script is a Multisig script (called `MultisigScriptHashInput`).
 
@@ -90,7 +90,7 @@ Both `PublicKeyHashInput` and `MultisigScriptHashInput` cache the information ab
 
 Some methods related to adding inputs are:
 - `from`: A high level interface to add an input from a UTXO. It has a series of variants:
-  - `from(utxo)`: add an input from an [Unspent Transaction Output](http://bsv.io/guide/unspentoutput.html). Currently, only P2PKH outputs are supported.
+  - `from(utxo)`: add an input from an [Unspent Transaction Output]. Currently, only P2PKH outputs are supported.
   - `from(utxos)`: same as above, but passing in an array of Unspent Outputs.
   - `from(utxo, publicKeys, threshold)`: add an input that spends a UTXO with a P2SH output for a Multisig script. The `publicKeys` argument is an array of public keys, and `threshold` is the number of required signatures in the Multisig script.
 
@@ -106,7 +106,7 @@ This input contains a set of signatures in a `signatures` property, and each tim
 ## Signing a Transaction
 The following methods are used to manage signatures for a transaction:
 - `getSignatures`: takes an array of `PrivateKey` or strings from which a `PrivateKey` can be instantiated; the transaction to be signed; the kind of [signature hash to use](https://bitcoin.org/en/developer-guide#signature-hash-types). Returns an array of objects with the following properties:
-  - `signature`: an instance of [Signature](https://github.com/bitpay/bsv/blob/master/lib/crypto/signature.js)
+  - `signature`: an instance of [Signature]
   - `prevTxId`: this input's `prevTxId`,
   - `outputIndex`: this input's `outputIndex`,
   - `inputIndex`: this input's index in the transaction
