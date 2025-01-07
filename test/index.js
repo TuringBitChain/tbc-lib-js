@@ -4,8 +4,8 @@ var should = require('chai').should()
 var tbc = require('../')
 
 describe('#versionGuard', function () {
-  it('global._bsv should be defined', function () {
-    should.equal(global._bsv, tbc.version)
+  it('global._tbc should be defined', function () {
+    should.equal(global._tbc, tbc.version)
   })
 
   it('throw an error if version is already defined', function () {

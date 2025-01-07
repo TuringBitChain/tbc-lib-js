@@ -13,8 +13,8 @@ tbc.versionGuard = function (version) {
     console.warn(message)
   }
 }
-tbc.versionGuard(globalThis._bsv)
-globalThis._bsv = tbc.version
+tbc.versionGuard(globalThis._tbc)
+globalThis._tbc = tbc.version
 
 // crypto
 tbc.crypto = {}
