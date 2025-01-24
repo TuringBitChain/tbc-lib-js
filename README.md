@@ -26,7 +26,7 @@ const mnemonic = Mnemonic.fromString(
 );
 
 // get HDPrivateKey from mnemonic
-const HDPrivateKey = mnemonic.toHDPrivateKey('','mainnet');
+const HDPrivateKey = mnemonic.toHDPrivateKey('','livenet');
 
 // create private key from seed with compressed format
 // will sign the transaction with this private key
