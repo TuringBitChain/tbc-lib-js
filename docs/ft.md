@@ -255,7 +255,7 @@ export class FT {
      */
     async fetchTXraw(txid: string): Promise<tbc.Transaction> {
         const url_testnet = `https://tbcdev.org/v1/tbc/main/tx/hex/${txid}`;
-        const url_mainnet = `https://turingwallet.xyz/v1/tbc/main/tx/hex/${txid}`;
+        const url_mainnet = `https://api.turingwallet.xyz/v1/tbc/main/tx/hex/${txid}`;
         let url = url_testnet;
         if (network === tbc.Networks.testnet) {
             url = url_testnet
@@ -284,7 +284,7 @@ export class FT {
      */
     async broadcastTXraw(txraw: string): Promise<string> {
         const url_testnet = 'https://tbcdev.org/v1/tbc/main/broadcast/tx/raw';
-        const url_mainnet = 'https://turingwallet.xyz/v1/tbc/main/broadcast/tx/raw';
+        const url_mainnet = 'https://api.turingwallet.xyz/v1/tbc/main/broadcast/tx/raw';
         let url = url_testnet;
         if (network === tbc.Networks.testnet) {
             url = url_testnet
@@ -337,7 +337,7 @@ export class FT {
             hash = addressOrHash + '01';
         }
         const url_testnet = `https://tbcdev.org/v1/tbc/main/ft/utxo/combine/script/${hash}/contract/${contractTxid}`;
-        const url_mainnet = `https://turingwallet.xyz/v1/tbc/main/ft/utxo/combine/script/${hash}/contract/${contractTxid}`;
+        const url_mainnet = `https://api.turingwallet.xyz/v1/tbc/main/ft/utxo/combine/script/${hash}/contract/${contractTxid}`;
         let url = url_testnet;
         if (network === tbc.Networks.testnet) {
             url = url_testnet
@@ -397,7 +397,7 @@ export class FT {
             hash = addressOrHash + '01';
         }
         const url_testnet = `https://tbcdev.org/v1/tbc/main/ft/utxo/combine/script/${hash}/contract/${contractTxid}`;
-        const url_mainnet = `https://turingwallet.xyz/v1/tbc/main/ft/utxo/combine/script/${hash}/contract/${contractTxid}`;
+        const url_mainnet = `https://api.turingwallet.xyz/v1/tbc/main/ft/utxo/combine/script/${hash}/contract/${contractTxid}`;
         let url = url_testnet;
         if (network === tbc.Networks.testnet) {
             url = url_testnet
@@ -454,7 +454,7 @@ export class FT {
      */
     async fetchFtInfo(contractTxid: string): Promise<FtInfo> {
         const url_testnet = `https://tbcdev.org/v1/tbc/main/ft/info/contract/id/${contractTxid}`;
-        const url_mainnet = `https://turingwallet.xyz/v1/tbc/main/ft/info/contract/id/${contractTxid}`;
+        const url_mainnet = `https://api.turingwallet.xyz/v1/tbc/main/ft/info/contract/id/${contractTxid}`;
         let url = url_testnet;
         if (network === tbc.Networks.testnet) {
             url = url_testnet
@@ -498,7 +498,7 @@ export class FT {
         const address = privateKey.toAddress().toString();
         const contractTxid = this.contractTxid;
         const url_testnet = `https://tbcdev.org/v1/tbc/main/ft/utxo/address/${address}/contract/${contractTxid}`;
-        const url_mainnet = `https://turingwallet.xyz/v1/tbc/main/ft/utxo/address/${address}/contract/${contractTxid}`;
+        const url_mainnet = `https://api.turingwallet.xyz/v1/tbc/main/ft/utxo/address/${address}/contract/${contractTxid}`;
         let url = url_testnet;
         if (network === tbc.Networks.testnet) {
             url = url_testnet
@@ -597,7 +597,7 @@ export class FT {
             hash = addressOrHash + '01';
         }
         const url_testnet = `https://tbcdev.org/v1/tbc/main/ft/balance/combine/script/${hash}/contract/${contractTxid}`;
-        const url_mainnet = `https://turingwallet.xyz/v1/tbc/main/ft/balance/combine/script/${hash}/contract/${contractTxid}`;
+        const url_mainnet = `https://api.turingwallet.xyz/v1/tbc/main/ft/balance/combine/script/${hash}/contract/${contractTxid}`;
         let url = url_testnet;
         if (network === tbc.Networks.testnet) {
             url = url_testnet
@@ -620,7 +620,7 @@ export class FT {
      */
     async fetchUTXO(address: any): Promise<tbc.Transaction.IUnspentOutput> {
         const url_testnet = `https://tbcdev.org/v1/tbc/main/address/${address}/unspent/`;
-        const url_mainnet = `https://turingwallet.xyz/v1/tbc/main/address/${address}/unspent/`;
+        const url_mainnet = `https://api.turingwallet.xyz/v1/tbc/main/address/${address}/unspent/`;
         let url = url_testnet;
         if (network === tbc.Networks.testnet) {
             url = url_testnet

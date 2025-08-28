@@ -983,7 +983,7 @@ export class poolNFT {
     async fetchFtlpUTXO(ftlpCode: string, amount: bigint): Promise<tbc.Transaction.IUnspentOutput> {
         const ftlpHash = tbc.crypto.Hash.sha256(Buffer.from(ftlpCode, 'hex')).reverse().toString('hex');
         const url_testnet = `https://tbcdev.org/v1/tbc/main/ft/lp/unspent/by/script/hash${ftlpHash}`;
-        const url_mainnet = `https://turingwallet.xyz/v1/tbc/main/ft/lp/unspent/by/script/hash${ftlpHash}`;
+        const url_mainnet = `https://api.turingwallet.xyz/v1/tbc/main/ft/lp/unspent/by/script/hash${ftlpHash}`;
         let url = url_testnet;
         if (network === tbc.Networks.testnet) {
             url = url_testnet
@@ -1014,7 +1014,7 @@ export class poolNFT {
     static async fetchFtlpBalance(ftlpCode: string): Promise<bigint> {
         const ftlpHash = tbc.crypto.Hash.sha256(Buffer.from(ftlpCode, 'hex')).reverse().toString('hex');
         const url_testnet = `https://tbcdev.org/v1/tbc/main/ft/lp/unspent/by/script/hash${ftlpHash}`;
-        const url_mainnet = `https://turingwallet.xyz/v1/tbc/main/ft/lp/unspent/by/script/hash${ftlpHash}`;
+        const url_mainnet = `https://api.turingwallet.xyz/v1/tbc/main/ft/lp/unspent/by/script/hash${ftlpHash}`;
         let url = url_testnet;
         if (network === tbc.Networks.testnet) {
             url = url_testnet
@@ -1042,7 +1042,7 @@ export class poolNFT {
         const hash = poolnft_codehash160 + '01';
         const contractTxid = this.ft_a_contractTxid;
         const url_testnet = `https://tbcdev.org/v1/tbc/main/ft/utxo/combine/script/${hash}/contract/${contractTxid}`;
-        const url_mainnet = `https://turingwallet.xyz/v1/tbc/main/ft/utxo/combine/script/${hash}/contract/${contractTxid}`;
+        const url_mainnet = `https://api.turingwallet.xyz/v1/tbc/main/ft/utxo/combine/script/${hash}/contract/${contractTxid}`;
         let url = url_testnet;
         if (network === tbc.Networks.testnet) {
             url = url_testnet
@@ -1152,7 +1152,7 @@ export class poolNFT {
         const ftlpCodeScript = this.getFTLPcode(tbc.crypto.Hash.sha256(Buffer.from(this.poolnft_code,'hex')).toString('hex'), address, FTA.tapeScript.length / 2);
         const ftlpCodeHash = tbc.crypto.Hash.sha256(ftlpCodeScript.toBuffer()).reverse().toString('hex');
         const url_testnet = `https://tbcdev.org/v1/tbc/main/ft/lp/unspent/by/script/hash${ftlpCodeHash}`;
-        const url_mainnet = `https://turingwallet.xyz/v1/tbc/main/ft/lp/unspent/by/script/hash${ftlpCodeHash}`;
+        const url_mainnet = `https://api.turingwallet.xyz/v1/tbc/main/ft/lp/unspent/by/script/hash${ftlpCodeHash}`;
         let url = url_testnet;
         if (network === tbc.Networks.testnet) {
             url = url_testnet
@@ -1231,7 +1231,7 @@ export class poolNFT {
 
     async broadcastTXraw(txraw: string): Promise<string> {
         const url_testnet = 'https://tbcdev.org/v1/tbc/main/broadcast/tx/raw';
-        const url_mainnet = 'https://turingwallet.xyz/v1/tbc/main/broadcast/tx/raw';
+        const url_mainnet = 'https://api.turingwallet.xyz/v1/tbc/main/broadcast/tx/raw';
         let url = url_testnet;
         if (network === tbc.Networks.testnet) {
             url = url_testnet
@@ -1407,7 +1407,7 @@ export class poolNFT {
 export async function mergeUTXO(privateKey: tbc.PrivateKey) {
     const address = tbc.Address.fromPrivateKey(privateKey).toString();
     const url_testnet = `https://tbcdev.org/v1/tbc/main/address/${address}/unspent/`;
-    const url_mainnet = `https://turingwallet.xyz/v1/tbc/main/address/${address}/unspent/`;
+    const url_mainnet = `https://api.turingwallet.xyz/v1/tbc/main/address/${address}/unspent/`;
     let url = url_testnet;
     if (network === tbc.Networks.testnet) {
         url = url_testnet
@@ -1453,7 +1453,7 @@ export async function mergeUTXO(privateKey: tbc.PrivateKey) {
 
 async function broadcastTXraw(txraw: string): Promise<string> {
     const url_testnet = 'https://tbcdev.org/v1/tbc/main/broadcast/tx/raw';
-    const url_mainnet = 'https://turingwallet.xyz/v1/tbc/main/broadcast/tx/raw';
+    const url_mainnet = 'https://api.turingwallet.xyz/v1/tbc/main/broadcast/tx/raw';
     let url = url_testnet;
     if (network === tbc.Networks.testnet) {
         url = url_testnet
