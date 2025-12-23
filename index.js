@@ -66,10 +66,6 @@ tbc.ECIES = require("./lib/ecies");
 tbc.HashCache = require("./lib/hash-cache");
 tbc.Mnemonic = require("./lib/mnemonic/mnemonic.js");
 tbc.Message = require("./lib/message/message.js");
-tbc.FT = require("./lib/contract/ft.js");
-tbc.NFT = require("./lib/contract/nft.js");
-tbc.Multisig = require("./lib/contract/multiSig.js");
-tbc.poolNFT = require("./lib/contract/poolNFT.js");
 tbc.Taproot = require("./lib/taproot.js");
 
 // Internal usage, exposed for testing/advanced tweaking
