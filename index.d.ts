@@ -598,6 +598,8 @@ declare module "tbc-lib-js" {
 
     static OP_PUSH_META: number;
     static OP_PARTIAL_HASH: number;
+    static OP_CHECKDATASIG: number;
+    static OP_CHECKDATASIGVERIFY: number;
 
     // template matching params
     static OP_PUBKEYHASH: number;
@@ -750,6 +752,76 @@ declare module "tbc-lib-js" {
       ): boolean;
     }
 
+    /**
+     * BIP340 Schnorr signatures over secp256k1. The TBC node's verification
+     * path accepts exactly this scheme: 32-byte x-only pubkey, 64-byte
+     * signature (r || s).
+     */
+    namespace Schnorr {
+      function sign(msg32: Buffer, privKey32: Buffer, aux32?: Buffer): Buffer;
+      function verify(msg32: Buffer, sig64: Buffer, xOnlyPub32: Buffer): boolean;
+      function taggedHash(tag: string, data: Buffer): Buffer;
+      function liftX(xBuf: Buffer): any | null;
+    }
+
+    interface MuSig2KeyAggCtx {
+      Q: any;
+      gacc: BN;
+      tacc: BN;
+      L: Buffer;
+      pubkeys: Buffer[];
+      coefs: BN[];
+    }
+
+    interface MuSig2Session {
+      keyAggCtx: MuSig2KeyAggCtx;
+      aggnonce: Buffer;
+      msg: Buffer;
+      b: BN;
+      R: any;
+      RxOnly: Buffer;
+      e: BN;
+    }
+
+    interface MuSig2NonceGenOpts {
+      pk: Buffer;
+      sk?: Buffer;
+      aggpk?: Buffer;
+      msg?: Buffer;
+      extra?: Buffer;
+    }
+
+    /**
+     * BIP327 MuSig2 over secp256k1. Operates on 33-byte compressed
+     * pubkeys; the aggregate key is emitted as a 32-byte x-only pubkey
+     * compatible with crypto.Schnorr.verify.
+     */
+    namespace MuSig2 {
+      function keySort(pubkeys33: Buffer[]): Buffer[];
+      function keyAgg(pubkeys33: Buffer[]): MuSig2KeyAggCtx;
+      function getAggPubkey(ctx: MuSig2KeyAggCtx): Buffer;
+      function pubkeyFromSk(sk32: Buffer): Buffer;
+      function nonceGen(opts: MuSig2NonceGenOpts): { secnonce: Buffer; pubnonce: Buffer };
+      function nonceAgg(pubnonces66: Buffer[]): Buffer;
+      function buildSession(
+        ctx: MuSig2KeyAggCtx,
+        aggnonce66: Buffer,
+        msg32: Buffer
+      ): MuSig2Session;
+      function partialSign(
+        secnonce97: Buffer,
+        sk32: Buffer,
+        session: MuSig2Session
+      ): Buffer;
+      function partialVerify(
+        psig32: Buffer,
+        pubnonce66: Buffer,
+        pk33: Buffer,
+        session: MuSig2Session
+      ): boolean;
+      function partialSigAgg(psigs32: Buffer[], session: MuSig2Session): Buffer;
+    }
+
     namespace Hash {
       function sha1(buffer: Buffer): Buffer;
       function sha256(buffer: Buffer): Buffer;
@@ -778,8 +850,17 @@ declare module "tbc-lib-js" {
 
     class Signature {
       static fromDER(sig: Buffer): Signature;
+      /**
+       * Parses sig || sighash byte. Accepts 65-byte buffers as BIP340
+       * Schnorr signatures and DER-encoded buffers as ECDSA.
+       */
       static fromTxFormat(buf: Buffer): Signature;
       static fromString(data: string): Signature;
+      /**
+       * Wrap a 64-byte BIP340 Schnorr signature; toTxFormat will emit
+       * sig64 || sighashType (65 bytes on the script stack).
+       */
+      static fromSchnorr(sig64: Buffer, nhashtype: number): Signature;
       static SIGHASH_ALL: number;
       static SIGHASH_NONE: number;
       static SIGHASH_SINGLE: number;
@@ -794,6 +875,10 @@ declare module "tbc-lib-js" {
       static ANYONECANPAY_SINGLE: number;
 
       nhashtype: number;
+      /** True when this signature wraps a BIP340 Schnorr sig. */
+      schnorr?: boolean;
+      /** Raw 64-byte BIP340 signature when {@link schnorr} is true. */
+      schnorrSig?: Buffer;
       toString(): string;
       toBuffer(): Buffer;
       toDER(): Buffer;
@@ -914,6 +999,31 @@ declare module "tbc-lib-js" {
         flags?: number,
         hashCache?: HashCache
       ): boolean;
+      /**
+       * BIP340 Schnorr signing for a transaction input. The sighash
+       * preimage/digest is identical to the ECDSA path; only the signature
+       * scheme differs (TBC interpreter dispatches by signature length).
+       */
+      function signSchnorr(
+        transaction: Transaction,
+        privateKey: PrivateKey,
+        sighashType: number,
+        inputIndex: number,
+        subscript: Script,
+        satoshisBN: crypto.BN,
+        flags?: number,
+        hashCache?: HashCache
+      ): crypto.Signature;
+      function verifySchnorr(
+        transaction: Transaction,
+        signature: crypto.Signature,
+        publicKey: PublicKey,
+        inputIndex: number,
+        subscript: Script,
+        satoshisBN: crypto.BN,
+        flags?: number,
+        hashCache?: HashCache
+      ): boolean;
     }
   }
 
@@ -933,7 +1043,9 @@ declare module "tbc-lib-js" {
     from(
       utxo: Transaction.IUnspentOutput | Transaction.IUnspentOutput[],
       pubkeys?: PublicKey[],
-      threshold?: number
+      threshold?: number,
+      nestedWitness?: boolean,
+      opts?: { schnorr?: boolean }
     ): this;
 
     fromString(rawTxHex: string): this;
@@ -944,7 +1056,8 @@ declare module "tbc-lib-js" {
     feePerKb(amount: number): this;
     sign(
       privateKey: PrivateKey[] | string[] | PrivateKey | string,
-      sigtype?: number
+      sigtype?: number,
+      signingMethod?: "schnorr" | "ecdsa"
     ): this;
     applySignature(sig: {
       inputIndex: number;
@@ -1138,8 +1251,20 @@ declare module "tbc-lib-js" {
     //static fromX(odd: boolean, x: Point): PublicKey;
     static fromString(str: string): PublicKey;
     static fromHex(hex: string): PublicKey;
+    /**
+     * Build a PublicKey from a 32-byte BIP340 x-only encoding (even-y lift).
+     */
+    static fromXOnly(buf: Buffer): PublicKey;
     static getValidationError(data: string): any | null;
     static isValid(data: string): boolean;
+
+    /** 32-byte x coordinate (BIP340 / TBC Schnorr). */
+    toXOnly(): Buffer;
+    /**
+     * P2PKH Address whose locking script expects the 32-byte x-only
+     * pubkey push (HASH160 over toXOnly()), spendable by a Schnorr sig.
+     */
+    toXOnlyAddress(network?: Networks.Type): Address;
   }
 
   export class Message {
@@ -1281,13 +1406,13 @@ declare module "tbc-lib-js" {
     function buildMultisigOut(
       publicKeys: PublicKey[],
       threshold: number,
-      opts: object
+      opts?: { noSorting?: boolean; schnorr?: boolean }
     ): Script;
     function buildMultisigIn(
       pubkeys: PublicKey[],
       threshold: number,
       signatures: Buffer[],
-      opts: object
+      opts?: { noSorting?: boolean; schnorr?: boolean; bitfield?: Buffer }
     ): Script;
 
     function buildPublicKeyHashOut(
@@ -1340,6 +1465,7 @@ declare module "tbc-lib-js" {
       static SCRIPT_ENABLE_MONOLITH_OPCODES: number;
       static SCRIPT_VERIFY_STRICTENC: number;
       static SCRIPT_ENABLE_SIGHASH_FORKID: number;
+      static SCRIPT_ENABLE_SCHNORR_MULTISIG: number;
       static SCRIPT_VERIFY_LOW_S: number;
       static SCRIPT_VERIFY_NULLFAIL: number;
       static SCRIPT_VERIFY_DERSIG: number;

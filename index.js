@@ -24,6 +24,8 @@ tbc.crypto.Hash = require("./lib/crypto/hash");
 tbc.crypto.Random = require("./lib/crypto/random");
 tbc.crypto.Point = require("./lib/crypto/point");
 tbc.crypto.Signature = require("./lib/crypto/signature");
+tbc.crypto.Schnorr = require("./lib/crypto/schnorr");
+tbc.crypto.MuSig2 = require("./lib/crypto/musig2");
 
 // encoding
 tbc.encoding = {};
