@@ -1,4 +1,5 @@
 test/
+examples/
 benchmark.js
 .mocharc.yaml
 .travis.yml
@@ -7,3 +8,26 @@ tbc-ecies.min.js
 tbc-message.min.js
 tbc-mnemonic.min.js
 tbc.min.js
+CLAUDE.md
+
+# editor / tooling state
+.claude/
+.vscode/
+.idea/
+.history/
+*.iml
+
+# local / OS artifacts
+.DS_Store
+Thumbs.db
+*.log
+*.tgz
+*.tar
+coverage/
+.nyc_output/
+
+# repo metadata not useful to consumers
+.gitignore
+.npmignore
+.gitattributes
+.github/

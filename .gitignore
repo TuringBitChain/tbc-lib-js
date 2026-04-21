@@ -7,13 +7,30 @@ dist
 CONTRIBUTING.html
 LICENSE.html
 README.html
+CLAUDE.md
 examples.html
+examples/
 npm-debug.log
 
 apiref
 bower_components
 report
 .DS_Store
+Thumbs.db
 
 .nyc_output
 *.tar
+*.tgz
+*.log
+
+# editor / tooling state
+.claude/
+.vscode/
+.idea/
+.history/
+*.iml
+
+# lockfile (this is a library, lockfile is not authoritative)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
