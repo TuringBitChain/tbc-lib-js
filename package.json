@@ -25,6 +25,9 @@
   "browser": {
     "request": "browser-request"
   },
+  "scripts": {
+    "test": "node --no-deprecation --test"
+  },
   "dependencies": {
     "aes-js": "^3.1.2",
     "axios": "^1.7.7",
