@@ -13,6 +13,7 @@
 - Use exact dependency versions `elliptic@6.6.1` and `bn.js@4.12.3`.
 - Do not change contract APIs, transaction formats, fee behavior, address encoding, signature formats, or exported class names.
 - Apply only the upstream zero-width mask fix to vendored `lib/bn.js`; do not replace the vendored implementation.
+- Preserve the repository policy that excludes package-manager lockfiles.
 - Tests must not perform network requests or transaction broadcasts.
 - Fixed-vector signatures and transaction IDs must remain byte-for-byte identical.
 
@@ -36,7 +37,7 @@ Run:
 npm install --ignore-scripts
 ```
 
-Expected: current vulnerable versions are installed and a lockfile is generated.
+Expected: current vulnerable versions are installed; the locally generated lockfile remains ignored.
 
 - [ ] **Step 2: Write the failing vendored BN test**
 
@@ -92,7 +93,7 @@ Expected: PASS with one test and zero failures.
 - [ ] **Step 6: Commit the vendored BN fix**
 
 ```bash
-git add lib/bn.js test/security-regressions.test.js package-lock.json
+git add lib/bn.js test/security-regressions.test.js
 git commit -m "fix: preserve canonical BN zero after masking"
 ```
 
@@ -100,7 +101,6 @@ git commit -m "fix: preserve canonical BN zero after masking"
 
 **Files:**
 - Modify: `package.json:28-40`
-- Modify: `package-lock.json`
 - Modify: `test/security-regressions.test.js`
 
 **Interfaces:**
@@ -158,7 +158,7 @@ Run:
 npm install --ignore-scripts
 ```
 
-Expected: `package-lock.json` resolves direct `elliptic@6.6.1` and `bn.js@4.12.3`.
+Expected: the local install resolves direct `elliptic@6.6.1` and `bn.js@4.12.3`; the ignored lockfile is not committed.
 
 - [ ] **Step 5: Run all security regression tests**
 
@@ -173,7 +173,7 @@ Expected: three tests pass with zero failures.
 - [ ] **Step 6: Commit the dependency upgrade**
 
 ```bash
-git add package.json package-lock.json test/security-regressions.test.js
+git add package.json test/security-regressions.test.js
 git commit -m "fix: upgrade vulnerable cryptography dependencies"
 ```
 
@@ -376,6 +376,6 @@ Expected:
 - [ ] **Step 5: Commit compatibility coverage**
 
 ```bash
-git add package.json package-lock.json test/cryptography-compatibility.test.js
+git add package.json test/cryptography-compatibility.test.js
 git commit -m "test: cover cryptography upgrade compatibility"
 ```

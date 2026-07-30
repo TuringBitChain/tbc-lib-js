@@ -12,7 +12,6 @@ Schnorr, MuSig2, address, and transaction operations.
 - Upgrade the direct `bn.js` dependency to `4.12.3`.
 - Apply the upstream `bn.js@4.12.3` zero-width mask fix to the vendored
   `lib/bn.js` implementation.
-- Restore a reproducible npm lockfile.
 - Add security regression and cryptographic compatibility tests using Node's
   built-in test runner.
 
@@ -56,8 +55,10 @@ browser behavior simultaneously. It is not appropriate for a minimal patch.
 - `elliptic`: `6.6.1`
 - `bn.js`: `4.12.3`
 
-An exact-version lockfile will be generated so local development and CI test
-the same dependency graph that is published.
+The repository intentionally excludes package-manager lockfiles because it is
+a published library. The two security-sensitive dependencies therefore remain
+exact versions in `package.json`; a locally generated ignored lockfile may be
+used during verification but will not be committed.
 
 ### Vendored BN fix
 
