@@ -10,6 +10,7 @@ Schnorr, MuSig2, address, and transaction operations.
 
 - Upgrade the direct `elliptic` dependency to `6.6.1`.
 - Upgrade the direct `bn.js` dependency to `4.12.3`.
+- Bump the package patch version to `1.0.31` so consumers can receive the fix.
 - Apply the upstream `bn.js@4.12.3` zero-width mask fix to the vendored
   `lib/bn.js` implementation.
 - Add security regression and cryptographic compatibility tests using Node's

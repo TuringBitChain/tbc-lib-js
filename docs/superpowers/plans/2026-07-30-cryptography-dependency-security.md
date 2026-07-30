@@ -11,6 +11,7 @@
 ## Global Constraints
 
 - Use exact dependency versions `elliptic@6.6.1` and `bn.js@4.12.3`.
+- Publishable package version is `1.0.31`.
 - Do not change contract APIs, transaction formats, fee behavior, address encoding, signature formats, or exported class names.
 - Apply only the upstream zero-width mask fix to vendored `lib/bn.js`; do not replace the vendored implementation.
 - Preserve the repository policy that excludes package-manager lockfiles.
@@ -146,6 +147,7 @@ Expected: FAIL because the current external BN produces a corrupt zero and the o
 Change `package.json` dependencies to:
 
 ```json
+"version": "1.0.31",
 "bn.js": "4.12.3",
 "elliptic": "6.6.1"
 ```
